@@ -88,6 +88,49 @@ JWT_EXPIRES_IN=7d
 NODE_ENV=development
 ```
 
+## Git Conventions
+
+### Branch Strategy
+
+```
+main                    — Stable, production-ready code
+  └── feature/<name>    — New feature development
+```
+
+Always branch from `main`. Merge back only after feature is complete and tested.
+
+### Commit Message Format
+
+Conventional Commits:
+
+```
+<type>(<scope>): <description>
+```
+
+Types: `feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `style`
+Scopes: `auth`, `user`, `api`, `config`, `utils`, `model`, etc.
+
+Examples:
+```
+feat(opportunity): implement create endpoint
+fix(auth): prevent role escalation in profile update
+docs(api): update endpoint documentation
+refactor(utils): extract token helper
+```
+
+### Milestone Tags
+
+After each milestone:
+```
+git tag milestone-<n>-complete
+```
+
+### Milestone Freeze Rule
+
+Once a milestone is complete, its APIs are frozen. Do not modify existing endpoints unless it is a critical bug fix. All new development uses feature branches. Preserve backward compatibility with existing `/api/v1` endpoints.
+
+---
+
 ## Naming Conventions
 
 - Files: kebab-case (e.g., `auth-routes.js`)
