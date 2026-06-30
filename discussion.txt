@@ -189,6 +189,52 @@ Next Step:
 ---
 Date: 2026-06-30
 
+Topic: Milestone 2 — D1 to D5 Complete. Session End.
+
+Discussion Summary:
+- Milestone 2 phases D1 through D5 completed in this session
+- D1: Schema review and approval (15 fields, 5 indexes, full auth matrix)
+- D2: Constants + Model (Opportunity.js with nested location/duration)
+- D3: Validators (create + update schemas, regex, title case, skills norm, forbidden fields)
+- D4: Generic reusable ownership middleware (checkOwnership with configurable options)
+- D5: Service layer (6 methods, $text search, filter, pagination, sort, status transitions, soft delete)
+- Session continuity infra added: Recovery Rule, CURRENT_STATE.md, GitHub Push Rule
+- 14 commits on feature/opportunity-module branch
+
+Permanent Rules Added:
+- Session Recovery Rule (MASTER_PROMPT.md)
+- GitHub Push Rule (backend-rules.md) — milestone-wise push only
+- CURRENT_STATE.md created for resumability
+
+Files Created:
+- src/constants/opportunityStatus.js
+- src/models/Opportunity.js
+- src/validators/opportunityValidator.js
+- src/middlewares/ownershipMiddleware.js
+- src/services/opportunityService.js
+- CURRENT_STATE.md
+
+Files Modified:
+- MASTER_PROMPT.md — Session Recovery Rule added
+- backend-rules.md — GitHub Push Rule, Status Transitions added
+- todo.md — D1-D5 marked complete
+- discussion.txt — this entry appended
+
+Completed Tasks:
+- M2: D1 (Schema) ✅ D2 (Model) ✅ D3 (Validators) ✅ D4 (Ownership) ✅ D5 (Service) ✅
+
+Next Step:
+- Phase D6 — Controller & Routes
+
+Session End:
+- Branch: feature/opportunity-module
+- 14 commits, all clean
+- GitHub NOT pushed (wait for command)
+- Resume: use Resume Session Prompt
+
+---
+Date: 2026-06-30
+
 Topic: Code Review Sprint — Milestone 1 Post-Review Fixes
 
 Discussion Summary:

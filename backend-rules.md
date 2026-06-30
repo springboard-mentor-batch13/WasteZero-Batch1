@@ -131,6 +131,53 @@ Once a milestone is complete, its APIs are frozen. Do not modify existing endpoi
 
 ---
 
+## GitHub Push Rule
+
+Hum **milestone-wise push** karenge.
+
+Only push when the user explicitly says:
+
+- `PUSH MILESTONE 1`
+- `PUSH MILESTONE 2`
+- `PUSH MILESTONE 3`
+- `PUSH MILESTONE 4`
+- `PUSH FINAL PROJECT`
+
+Never push to GitHub without explicit approval.
+
+---
+
+## Schema Change Rule
+
+Once a schema is approved and implemented, any future change must include:
+
+1. Why the change is needed.
+2. Whether it is backward compatible.
+3. Whether a migration is required.
+4. Which existing APIs are affected.
+
+---
+
+## Status Transitions (Opportunity)
+
+```
+OPEN
+  ├──> IN_PROGRESS
+  ├──> CANCELLED (terminal)
+  └──> CLOSED
+
+IN_PROGRESS
+  └──> CLOSED
+
+CLOSED
+  └──> OPEN (Admin only)
+
+CANCELLED
+  └──> No further transitions (terminal)
+```
+
+---
+
 ## Naming Conventions
 
 - Files: kebab-case (e.g., `auth-routes.js`)

@@ -7,33 +7,43 @@ WasteZero — Smart Waste Pickup & Recycling Platform
 Milestone 2 — Opportunity Management
 
 ## Current Phase
-D5 — Opportunity Service (READY TO START)
+D5 — Opportunity Service ✅ (Just Completed)
 
 ## Completed Phases
-- Milestone 1 ✅ (C1–C5)
+### Milestone 1 ✅
+- C1 — Project Foundation
+- C2 — Infrastructure
+- C3 — Authentication Foundation
+- C4 — Business Logic
+- C5 — Testing & Documentation
+- Code Review Fixes
+
+### Milestone 2 (In Progress)
 - D1 — Schema Review ✅
 - D2 — Constants & Model ✅
 - D3 — Validators ✅
 - D4 — Ownership Middleware ✅
+- **D5 — Service Layer ✅ (Just Completed)**
+
+## Next Phase
+D6 — Controller & Routes
+
+## Pending Phases
+- D6 — Controller (`opportunityController.js`) + Routes (`opportunityRoutes.js`, update `index.js`)
+- D7 — Testing & Documentation
 
 ## Current Branch
 `feature/opportunity-module`
 
-## Next File to Create
-`src/services/opportunityService.js`
+## Local Git Status
+- 14 commits on `feature/opportunity-module`
+- Tagged: `milestone-1-complete`
+- GitHub: NOT pushed (waiting for "PUSH MILESTONE 1" command)
 
-## Next Action
-Implement Opportunity Service with CRUD, search, filter, pagination, sorting, status transitions, soft delete
-
-## Service API Methods (Approved)
-| Method | Purpose |
-|--------|---------|
-| `createOpportunity(data, userId)` | Create with auto status=OPEN, ngo=userId |
-| `getAllOpportunities(query)` | List with search/filter/pagination/sort |
-| `getOpportunityById(id)` | Single record |
-| `updateOpportunity(id, data, userId)` | Update with status transition validation |
-| `deleteOpportunity(id, userId)` | Soft delete |
-| `changeStatus(id, newStatus, userId)` | Status transition with rules |
+## Files That Will Be Touched Next
+- CREATE: `src/controllers/opportunityController.js`
+- CREATE: `src/routes/opportunityRoutes.js`
+- MODIFY: `src/routes/index.js`
 
 ## Blocked
 None
@@ -42,4 +52,4 @@ None
 None
 
 ## Last Updated
-2026-06-30 10:45 PM
+2026-06-30

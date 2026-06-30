@@ -2,9 +2,44 @@
 
 ## Pending
 
-### Milestone 2 — Opportunity Management (Future)
-- [ ] Opportunity CRUD (NGO only)
-- [ ] Opportunity listing & filtering
+### Milestone 2 — Opportunity Management
+
+#### Phase D1 — Schema Review & Approval
+- [ ] Present complete MongoDB schema with field-level explanations
+- [ ] Present indexes, validation rules, relationships, authorization rules
+- [ ] Wait for explicit approval before writing code
+
+#### Phase D2 — Constants & Model
+- [ ] Add `constants/opportunityStatus.js` (enum: OPEN, IN_PROGRESS, CLOSED, CANCELLED)
+- [ ] Create `src/models/Opportunity.js` (title, description, requiredSkills[], location, duration, status, maxVolunteers, applicationDeadline, ngo, createdBy, updatedBy, isDeleted, deletedAt)
+- [ ] Add indexes (title, status, location, ngo, createdAt)
+
+#### Phase D3 — Validators
+- [ ] Create `src/validators/opportunityValidator.js` (create + update schemas with pagination, search, filter params)
+
+#### Phase D4 — Ownership Middleware
+- [ ] Create `src/middlewares/ownershipMiddleware.js` (check opportunity.ngo === req.user.id)
+
+#### Phase D5 — Service ✅
+- [x] Create `src/services/opportunityService.js` (6 methods: create, list, getById, update, delete, changeStatus)
+- [x] Search via $text index
+- [x] Filter by status, location, skill
+- [x] Pagination (page=1, limit=10, max=100)
+- [x] Sorting (newest/oldest)
+- [x] Status transition engine
+- [x] Soft delete with audit
+
+#### Phase D6 — Controller & Routes
+- [ ] Create `src/controllers/opportunityController.js`
+- [ ] Create `src/routes/opportunityRoutes.js`
+- [ ] Update `src/routes/index.js` — mount at /api/v1/opportunities
+
+#### Phase D7 — Testing & Documentation
+- [ ] Test all CRUD + search/filter/pagination scenarios
+- [ ] Update `src/docs/api.md` — opportunity endpoints
+- [ ] Update README.md
+- [ ] Update discussion.txt
+- [ ] Update todo.md
 
 ### Milestone 3 — Matching & Communication (Future)
 - [ ] Matching algorithm (location + waste type)
