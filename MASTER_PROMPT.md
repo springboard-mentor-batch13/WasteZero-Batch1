@@ -726,6 +726,24 @@ Never continue to the next phase without approval.
 
 ---
 
+# MILESTONE RELEASE POLICY
+
+Development is continuous in the local Git repository.
+
+GitHub is NOT the development repository. GitHub is ONLY the milestone submission repository.
+
+Rules:
+
+1. Continue developing all milestones locally with clean commits.
+2. Never push automatically. Never ask to push.
+3. When I say "PUSH MILESTONE 1" — publish only Milestone 1 state.
+4. When I say "PUSH MILESTONE 2" — update GitHub to contain M1 + M2.
+5. Same rule for Milestones 3 and 4.
+6. Never publish future milestones before I explicitly request them.
+7. Local Git is always ahead of GitHub.
+
+---
+
 # SESSION RECOVERY RULE
 
 Every time a new OpenCode session starts:
