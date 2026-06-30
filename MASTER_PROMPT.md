@@ -726,6 +726,32 @@ Never continue to the next phase without approval.
 
 ---
 
+# SESSION RECOVERY RULE
+
+Every time a new OpenCode session starts:
+
+Never assume memory.
+
+Recover project state only from:
+
+- MASTER_PROMPT.md
+- discussion.txt
+- backend-rules.md
+- todo.md
+- README.md
+- CURRENT_STATE.md
+- Current source code
+
+These files are the project's memory.
+
+Never rely on conversation history.
+
+Always reconstruct the current project state before making any decision.
+
+If project files and documentation disagree, stop and ask. Never guess. Never silently fix.
+
+---
+
 # NEVER DO THESE
 
 Never generate Angular.
