@@ -1,0 +1,244 @@
+---
+Date: 2026-06-30
+
+Topic: Project Kickoff — Vision, Schema, and Milestone 1 Planning
+
+Discussion Summary:
+- Discussed overall project: WasteZero Smart Waste Pickup & Recycling Platform
+- Clarified the model: Volunteer/Opportunity model (NGO posts opportunities, volunteers apply)
+- Confirmed DB schema: 5 collections — Users, Opportunities, Applications, Messages, AdminLogs
+- Decided to start with Milestone 1: User Management
+- Role-based access: volunteer, ngo, admin
+- Agreed to NOT add Pickups, Notifications, WasteStats collections unless explicitly needed later
+
+Reason:
+- Infosys Springboard requirement defines the schema above
+- Stick to requirements, avoid scope creep
+
+Architecture Decision:
+- MVC architecture with Express.js + MongoDB + Mongoose
+- JWT + bcrypt for auth
+- Role-based auth middleware for 3 roles
+
+Files Created:
+- MASTER_PROMPT.md — Master prompt extracted from discussion.txt
+- backend-rules.md — Folder structure, coding standards, naming conventions
+- todo.md — Task tracker with Milestone 1-4 breakdown
+- README.md — Project overview
+- .opencode/opencode.json — OpenCode instructions config
+
+Files Modified:
+- discussion.txt — This entry appended
+- MASTER_PROMPT.md — DATABASE RULES section updated with full schema tables
+- todo.md — Populated with pending tasks across all 4 milestones
+
+Completed Tasks:
+- Project structure discussion complete
+- Schema finalized
+- TODO list created with all milestones
+
+Pending Tasks:
+- Milestone 1: User Management (scaffolding, User model, Register, Login, Profile, Auth middleware)
+
+Next Step:
+- Phase 1 discussion on User Management implementation details
+
+---
+Date: 2026-06-30
+
+Topic: Architecture Review — 8 Improvements + 5 Recommendations
+
+Discussion Summary:
+- Reviewed my proposed Phase 1 plan (scored 8.5/10)
+- I accepted all 8 review points:
+  1. Remove env.js (use dotenv.config() in server.js)
+  2. Add services/ layer (authService, userService)
+  3. Add logger (config/logger.js — Winston)
+  4. Add constants (constants/roles.js)
+  5. Add asyncHandler utility
+  6. API versioning (/api/v1)
+  7. Health route (GET /health)
+  8. Central config (config/database.js)
+- User added 5 more recommendations:
+  1. Central route index (routes/index.js)
+  2. Logger moved to config/ instead of utils/
+  3. docs/api.md for frontend team
+  4. Response standard with timestamp field
+  5. Finalized env vars (PORT, MONGODB_URI, JWT_SECRET, JWT_EXPIRES_IN, NODE_ENV)
+- Added Definition of Done (DoD) — 11 criteria per task
+
+Architecture Decision:
+- Final folder structure approved (see backend-rules.md)
+- Final API list approved (5 endpoints)
+- DoD rule added to MASTER_PROMPT.md and backend-rules.md
+- Response format with timestamp finalized
+- Routes/index.js pattern adopted
+
+Files Modified:
+- MASTER_PROMPT.md — PROJECT STRUCTURE, API RULES, env vars, DoD added
+- backend-rules.md — Full folder structure, API standards, env vars, naming, DoD
+- todo.md — Refined into granular tasks matching approved architecture
+- discussion.txt — This entry appended
+
+Completed Tasks:
+- Architecture review complete
+- All 13 improvements/recommendations accepted
+- Folder structure finalized
+- DoD rule established
+
+Next Step:
+- Wait for "START IMPLEMENTATION" to begin Phase C1
+
+---
+Date: 2026-06-30
+
+Topic: Mini-Phase Breakdown — 5 Phases for Milestone 1
+
+Discussion Summary:
+- User rejected single-commit 18-file approach
+- Divided Milestone 1 into 5 mini-phases:
+  2.1 — Project Foundation (server starts, /health works)
+  2.2 — Infrastructure (DB, logger, utils, constants)
+  2.3 — Authentication Foundation (User model, validators, middlewares)
+  2.4 — Business Logic (services, controllers, routes)
+  2.5 — Testing & Documentation (docs, testing, README, discussion.txt)
+- Added Phase-by-Phase rule to MASTER_PROMPT.md: stop after each phase, explain, wait for approval
+
+Reason:
+- Clean Git history
+- Easy debugging
+- Better learning (incremental understanding)
+- Industry-standard sprint practice
+
+Files Modified:
+- todo.md — Restructured into 5 mini-phases with checkboxes
+- MASTER_PROMPT.md — Added PHASE-BY-PHASE RULE section
+- discussion.txt — This entry appended
+
+Completed Tasks:
+- Phase breakdown approved
+- Phase-by-phase rule added
+
+Next Step:
+- Wait for "START IMPLEMENTATION" to begin Phase C1
+
+---
+Date: 2026-06-30
+
+Topic: Phase Renaming (C1–C5) + Recap Rule + Phase Output Template
+
+Discussion Summary:
+- Renamed mini-phases from 2.1–2.5 to C1–C5 (cleaner hierarchy)
+- Phase output template added — table with created files, packages, verification, git commit suggestion
+- Recap rule added: before each new phase, recap previous phase, explain why next is needed, what will be built, expected output
+
+Reason:
+- Consistent naming across project lifecycle
+- Easy context recovery when revisiting after days/weeks
+- Professional sprint review practice
+
+Files Modified:
+- MASTER_PROMPT.md — PHASE-BY-PHASE RULE expanded with naming, output template, recap rule
+- todo.md — 2.1–2.5 renamed to C1–C5
+- discussion.txt — This entry appended
+
+Completed Tasks:
+- Phase naming finalized (C1–C5)
+- Recap rule added
+- Phase output template defined
+
+Next Step:
+- Wait for "START IMPLEMENTATION" to begin Phase C1
+
+---
+Date: 2026-06-30
+
+Topic: Milestone 1 Complete — Phase C5 Testing & Documentation
+
+Discussion Summary:
+- Completed all 5 mini-phases of Milestone 1
+- Phase C5: Created api.md, updated README, todo.md, discussion.txt
+- Full E2E testing performed:
+  ✅ Register → 201 with token + user
+  ✅ Duplicate register → 409 Conflict
+  ✅ Login → 200 with token + user
+  ✅ Get Profile → 200 with user data
+  ✅ Update Profile → 200 with updated data
+  ✅ Wrong password → 401 Unauthorized
+- Fixed Mongoose deprecation warning (new → returnDocument)
+
+Files Created:
+- src/docs/api.md — Full API documentation with examples
+
+Files Modified:
+- README.md — Updated with accurate folder structure, API modules, env vars
+- todo.md — C1-C5 all marked completed
+- discussion.txt — This entry appended
+
+Completed Tasks:
+- Milestone 1 fully delivered
+- 21 files created total
+- All 5 APIs working and verified
+
+Pending Tasks:
+- Milestone 2 — Opportunity Management
+
+Next Step:
+- Move to Milestone 2 discussion
+
+---
+Date: 2026-06-30
+
+Topic: Code Review Sprint — Milestone 1 Post-Review Fixes
+
+Discussion Summary:
+- Full code review conducted (12 issues found)
+- All issues fixed:
+
+  Security (3):
+  ✅ helmet + cors added
+  ✅ throw → next() in middlewares
+  ✅ Default JWT_SECRET warning on startup
+
+  Bug Fixes (2):
+  ✅ Role escalation blocked (volunteer cannot change to admin)
+  ✅ Email/password change blocked in profile update
+
+  Architecture (4):
+  ✅ JWT signing extracted to utils/token.js (DRY)
+  ✅ User sanitize extracted to utils/token.js (DRY)
+  ✅ Validation error response moved to ApiResponse.validationError()
+  ✅ Env validation on startup (missing required vars → server exits)
+
+  Performance (1):
+  ✅ .lean() added to read-only queries (findById, findOne)
+
+  Cleanup (2):
+  ✅ __v removed from JSON responses
+  ✅ process.exit(1) moved from database.js to server.js
+
+Files Created:
+- src/utils/token.js — generateToken() + sanitizeUser()
+
+Files Modified:
+- src/app.js — added helmet, cors
+- src/server.js — env validation, default secret warning, graceful DB error handling
+- src/validators/userValidator.js — forbidden fields check (role, email, password)
+- src/middlewares/authMiddleware.js — throw → next()
+- src/middlewares/roleMiddleware.js — throw → next()
+- src/services/authService.js — uses token.js + .lean()
+- src/services/userService.js — .lean() + delete __v
+- src/controllers/authController.js — uses ApiResponse.validationError()
+- src/controllers/userController.js — uses ApiResponse.validationError()
+- src/models/User.js — toJSON transform (removes __v)
+- src/config/database.js — removed process.exit(1)
+- src/utils/ApiResponse.js — added .validationError()
+- todo.md — code review fixes added
+- discussion.txt — this entry appended
+
+Completed Tasks:
+- All 12 code review issues resolved
+- Milestone 1 now production-ready
+
+Next Step:
+- Move to Milestone 2 discussion
