@@ -158,6 +158,21 @@ Once a schema is approved and implemented, any future change must include:
 
 ---
 
+## Status Transitions (Application)
+
+```
+PENDING
+  ├──> ACCEPTED (terminal)
+  ├──> REJECTED (terminal)
+  └──> WITHDRAWN (terminal)
+
+ACCEPTED   — No further transitions (terminal)
+REJECTED   — No further transitions (terminal)
+WITHDRAWN  — No further transitions (terminal)
+```
+
+---
+
 ## Status Transitions (Opportunity)
 
 ```

@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const { OPPORTUNITY_STATUS_ARRAY } = require('../constants/opportunityStatus');
+const { DURATION_UNITS_ARRAY } = require('../constants/durationUnits');
 
 const titleRegex = /^[a-zA-Z0-9\s\-&']+$/;
 
@@ -70,7 +71,7 @@ const createSchema = Joi.object({
       'number.base': 'Duration value must be a number'
     }),
     unit: Joi.string()
-      .valid('hours', 'days', 'weeks', 'months')
+      .valid(...DURATION_UNITS_ARRAY)
       .required()
       .messages({
         'any.only': 'Duration unit must be hours, days, weeks, or months'
@@ -161,7 +162,7 @@ const updateSchema = Joi.object({
       'number.base': 'Duration value must be a number'
     }),
     unit: Joi.string()
-      .valid('hours', 'days', 'weeks', 'months')
+      .valid(...DURATION_UNITS_ARRAY)
       .messages({
         'any.only': 'Duration unit must be hours, days, weeks, or months'
       })
@@ -193,7 +194,18 @@ const updateSchema = Joi.object({
   'object.min': 'At least one field must be provided for update'
 });
 
+const statusChangeSchema = Joi.object({
+  status: Joi.string()
+    .valid(...OPPORTUNITY_STATUS_ARRAY)
+    .required()
+    .messages({
+      'any.only': 'Status must be one of: ' + OPPORTUNITY_STATUS_ARRAY.join(', '),
+      'string.empty': 'Status is required'
+    })
+});
+
 const validateCreateOpportunity = (data) => createSchema.validate(data, { abortEarly: false, stripUnknown: true });
 const validateUpdateOpportunity = (data) => updateSchema.validate(data, { abortEarly: false, stripUnknown: true });
+const validateStatusChange = (data) => statusChangeSchema.validate(data, { abortEarly: false });
 
-module.exports = { validateCreateOpportunity, validateUpdateOpportunity };
+module.exports = { validateCreateOpportunity, validateUpdateOpportunity, validateStatusChange };

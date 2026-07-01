@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { OPPORTUNITY_STATUS_ARRAY, OPPORTUNITY_STATUS } = require('../constants/opportunityStatus');
+const { DURATION_UNITS_ARRAY } = require('../constants/durationUnits');
 
 const opportunitySchema = new mongoose.Schema(
   {
@@ -44,7 +45,7 @@ const opportunitySchema = new mongoose.Schema(
         type: String,
         required: [true, 'Duration unit is required'],
         enum: {
-          values: ['hours', 'days', 'weeks', 'months'],
+          values: DURATION_UNITS_ARRAY,
           message: 'Unit must be hours, days, weeks, or months'
         }
       }

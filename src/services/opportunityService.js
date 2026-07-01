@@ -1,6 +1,7 @@
 const Opportunity = require('../models/Opportunity');
 const ApiError = require('../utils/ApiError');
 const { OPPORTUNITY_STATUS } = require('../constants/opportunityStatus');
+const { ROLES } = require('../constants/roles');
 
 const ALLOWED_TRANSITIONS = {
   [OPPORTUNITY_STATUS.OPEN]: [OPPORTUNITY_STATUS.IN_PROGRESS, OPPORTUNITY_STATUS.CLOSED, OPPORTUNITY_STATUS.CANCELLED],
@@ -93,7 +94,7 @@ const validateStatusTransition = (currentStatus, newStatus, userId, userRole) =>
   }
 
   if (newStatus === OPPORTUNITY_STATUS.OPEN && currentStatus === OPPORTUNITY_STATUS.CLOSED) {
-    if (userRole !== 'admin') {
+    if (userRole !== ROLES.ADMIN) {
       throw ApiError.forbidden('Only admins can reopen a closed opportunity');
     }
     return;
