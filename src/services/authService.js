@@ -88,8 +88,10 @@ const verifyEmail = async (email, otp) => {
     await User.updateOne(
       { _id: user._id },
       {
-        $set: { emailVerificationAttempts: 0 },
-        $unset: { emailVerificationLockedUntil: '' }
+        $set: {
+          emailVerificationAttempts: 0,
+          emailVerificationLockedUntil: null
+        }
       }
     );
   }
@@ -203,12 +205,7 @@ const forgotPassword = async (email) => {
   const hashedOtp = await hashOtp(otp);
   const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
 
-  let emailSent = true;
-  try {
-    await sendOtpEmail(user.email, otp, 'forgotPassword');
-  } catch (err) {
-    emailSent = false;
-  }
+  await sendOtpEmail(user.email, otp, 'forgotPassword');
 
   await User.updateOne(
     { _id: user._id },
@@ -223,10 +220,6 @@ const forgotPassword = async (email) => {
       }
     }
   );
-
-  if (!emailSent) {
-    return { message: 'If an account exists with this email, a reset code has been sent', warning: 'Email could not be sent. Please try again later.' };
-  }
 
   return { message: 'If an account exists with this email, a reset code has been sent' };
 };
@@ -247,8 +240,10 @@ const resetPassword = async (email, otp, newPassword) => {
     await User.updateOne(
       { _id: user._id },
       {
-        $set: { passwordResetAttempts: 0 },
-        $unset: { passwordResetLockedUntil: '' }
+        $set: {
+          passwordResetAttempts: 0,
+          passwordResetLockedUntil: null
+        }
       }
     );
   }

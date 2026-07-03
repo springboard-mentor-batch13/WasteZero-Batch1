@@ -1,5 +1,6 @@
 const Joi = require('joi');
 const { OTP_LENGTH } = require('../constants/security');
+const { passwordSchema } = require('./authValidator');
 
 const OTP_REGEX = new RegExp(`^\\d{${OTP_LENGTH}}$`);
 
@@ -37,11 +38,7 @@ const resetPasswordSchema = Joi.object({
     'string.pattern.base': `OTP must be exactly ${OTP_LENGTH} digits`,
     'string.empty': 'OTP is required'
   }),
-  password: Joi.string().min(6).max(128).required().messages({
-    'string.min': 'Password must be at least 6 characters',
-    'string.max': 'Password must not exceed 128 characters',
-    'string.empty': 'Password is required'
-  })
+  password: passwordSchema
 }).unknown(false);
 
 const validateVerifyEmail = (data) => verifyEmailSchema.validate(data, { abortEarly: false });

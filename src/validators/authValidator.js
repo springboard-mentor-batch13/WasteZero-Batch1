@@ -1,6 +1,12 @@
 const Joi = require('joi');
 const { ROLES_ARRAY } = require('../constants/roles');
 
+const passwordSchema = Joi.string().min(6).max(128).required().messages({
+  'string.min': 'Password must be at least 6 characters',
+  'string.max': 'Password must not exceed 128 characters',
+  'string.empty': 'Password is required'
+});
+
 const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).required().messages({
     'string.empty': 'Name is required',
@@ -11,10 +17,7 @@ const registerSchema = Joi.object({
     'string.email': 'Please provide a valid email',
     'string.empty': 'Email is required'
   }),
-  password: Joi.string().min(6).max(128).required().messages({
-    'string.min': 'Password must be at least 6 characters',
-    'string.empty': 'Password is required'
-  }),
+  password: passwordSchema,
   role: Joi.string().valid(...ROLES_ARRAY).required().messages({
     'any.only': 'Role must be one of: ' + ROLES_ARRAY.join(', '),
     'string.empty': 'Role is required'
@@ -37,4 +40,4 @@ const loginSchema = Joi.object({
 const validateRegister = (data) => registerSchema.validate(data, { abortEarly: false });
 const validateLogin = (data) => loginSchema.validate(data, { abortEarly: false });
 
-module.exports = { validateRegister, validateLogin };
+module.exports = { validateRegister, validateLogin, passwordSchema };
