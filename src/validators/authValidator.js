@@ -34,10 +34,18 @@ const loginSchema = Joi.object({
   }),
   password: Joi.string().required().messages({
     'string.empty': 'Password is required'
+  }),
+  rememberMe: Joi.boolean().optional()
+});
+
+const refreshTokenSchema = Joi.object({
+  refreshToken: Joi.string().required().messages({
+    'string.empty': 'Refresh token is required'
   })
 });
 
 const validateRegister = (data) => registerSchema.validate(data, { abortEarly: false });
 const validateLogin = (data) => loginSchema.validate(data, { abortEarly: false });
+const validateRefreshToken = (data) => refreshTokenSchema.validate(data, { abortEarly: false });
 
-module.exports = { validateRegister, validateLogin, passwordSchema };
+module.exports = { validateRegister, validateLogin, validateRefreshToken, passwordSchema };

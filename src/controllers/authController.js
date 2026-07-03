@@ -1,6 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/ApiResponse');
-const { validateRegister, validateLogin } = require('../validators/authValidator');
+const { validateRegister, validateLogin, validateRefreshToken } = require('../validators/authValidator');
 const { validateVerifyEmail, validateResendOtp, validateForgotPassword, validateResetPassword } = require('../validators/emailValidator');
 const authService = require('../services/authService');
 
@@ -20,7 +20,7 @@ const login = asyncHandler(async (req, res) => {
     return ApiResponse.validationError(res, error);
   }
 
-  const result = await authService.login(value);
+  const result = await authService.login(value, req);
   return ApiResponse.ok(res, 'Login successful', result);
 });
 
@@ -64,4 +64,24 @@ const resetPassword = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, result.message, result);
 });
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword };
+const refreshToken = asyncHandler(async (req, res) => {
+  const { error, value } = validateRefreshToken(req.body);
+  if (error) {
+    return ApiResponse.validationError(res, error);
+  }
+
+  const result = await authService.refreshToken(value.refreshToken);
+  return ApiResponse.ok(res, 'Tokens refreshed successfully', result);
+});
+
+const logout = asyncHandler(async (req, res) => {
+  const { error, value } = validateRefreshToken(req.body);
+  if (error) {
+    return ApiResponse.validationError(res, error);
+  }
+
+  const result = await authService.logout(value.refreshToken);
+  return ApiResponse.ok(res, result.message, result);
+});
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };

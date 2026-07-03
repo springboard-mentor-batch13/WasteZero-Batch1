@@ -1,9 +1,10 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
-const { generateToken, sanitizeUser } = require('../utils/token');
+const { sanitizeUser } = require('../utils/token');
 const { generateOtp, hashOtp, verifyOtp } = require('./otpService');
 const { sendOtpEmail } = require('./emailService');
+const tokenService = require('./tokenService');
 const {
   OTP_EXPIRY_MINUTES,
   MAX_OTP_ATTEMPTS,
@@ -38,8 +39,9 @@ const register = async ({ name, email, password, role, skills, location, bio }) 
     emailWarning = true;
   }
 
-  const token = generateToken(user._id, user.role);
-  const result = { token, user: sanitizeUser(user) };
+  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(user._id);
+  const result = { accessToken, refreshToken, expiresAt, user: sanitizeUser(user) };
 
   if (emailWarning) {
     result.warning = 'Account created but verification email could not be sent. You can request a new OTP from the resend endpoint.';
@@ -48,7 +50,7 @@ const register = async ({ name, email, password, role, skills, location, bio }) 
   return result;
 };
 
-const login = async ({ email, password }) => {
+const login = async ({ email, password, rememberMe }, req = {}) => {
   const user = await User.findOne({ email }).select('+password');
   if (!user) {
     throw ApiError.unauthorized('Invalid email or password');
@@ -63,9 +65,14 @@ const login = async ({ email, password }) => {
     throw ApiError.forbidden('Please verify your email before logging in');
   }
 
-  const token = generateToken(user._id, user.role);
+  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
+  const ipAddress = req.ip || req.connection?.remoteAddress || '';
+  const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
+    user._id, rememberMe, userAgent, ipAddress
+  );
 
-  return { token, user: sanitizeUser(user) };
+  return { accessToken, refreshToken, expiresAt, user: sanitizeUser(user) };
 };
 
 const verifyEmail = async (email, otp) => {
@@ -288,4 +295,32 @@ const resetPassword = async (email, otp, newPassword) => {
   return { message: 'Password updated successfully. Please log in again using your new password.' };
 };
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword };
+const refreshToken = async (plainRefreshToken) => {
+  const doc = await tokenService.verifyRefreshToken(plainRefreshToken);
+  if (!doc) {
+    throw ApiError.unauthorized('Invalid or expired refresh token');
+  }
+
+  const user = await User.findById(doc.user).lean();
+  if (!user) {
+    throw ApiError.unauthorized('User not found');
+  }
+
+  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const { token: newRefreshToken, expiresAt } = await tokenService.rotateRefreshToken(
+    plainRefreshToken,
+    user._id,
+    doc.rememberMe,
+    doc.userAgent,
+    doc.ipAddress
+  );
+
+  return { accessToken, refreshToken: newRefreshToken, expiresAt, user: sanitizeUser(user) };
+};
+
+const logout = async (plainRefreshToken) => {
+  await tokenService.revokeRefreshToken(plainRefreshToken);
+  return { message: 'Logged out successfully' };
+};
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };

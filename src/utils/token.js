@@ -1,13 +1,3 @@
-const jwt = require('jsonwebtoken');
-
-const generateToken = (userId, role) => {
-  return jwt.sign(
-    { userId, role },
-    process.env.JWT_SECRET,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-  );
-};
-
 const sanitizeUser = (user) => ({
   id: user._id,
   name: user.name,
@@ -15,7 +5,8 @@ const sanitizeUser = (user) => ({
   role: user.role,
   skills: user.skills,
   location: user.location,
-  bio: user.bio
+  bio: user.bio,
+  isEmailVerified: user.isEmailVerified
 });
 
-module.exports = { generateToken, sanitizeUser };
+module.exports = { sanitizeUser };
