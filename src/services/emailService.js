@@ -6,20 +6,32 @@ const logger = require('../config/logger');
 
 const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
 
-const sendOtpEmail = async (toEmail, otp) => {
+const SUBJECTS = {
+  verifyEmail: 'Verify Your Email — WasteZero',
+  forgotPassword: 'Reset Your Password — WasteZero'
+};
+
+const sendOtpEmail = async (toEmail, otp, templateName = 'verifyEmail') => {
   const transporter = createTransporter();
   const fromEmail = getFromEmail();
 
-  const html = loadTemplate('verifyEmail.html', otp);
+  const filename = `${templateName}.html`;
+  const html = loadTemplate(filename, otp);
+  const subject = SUBJECTS[templateName] || SUBJECTS.verifyEmail;
 
   await transporter.sendMail({
     from: fromEmail,
     to: toEmail,
-    subject: 'Verify Your Email — WasteZero',
+    subject,
     html
   });
 
-  logger.info('Verification email dispatched successfully');
+  logger.info(`${templateName} email dispatched successfully to ${maskEmail(toEmail)}`);
+};
+
+const maskEmail = (email) => {
+  const [local, domain] = email.split('@');
+  return `${local[0]}***@${domain}`;
 };
 
 const loadTemplate = (filename, otp) => {

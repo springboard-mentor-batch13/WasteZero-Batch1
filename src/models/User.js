@@ -72,6 +72,29 @@ const userSchema = new mongoose.Schema(
     },
     lastOtpSentAt: {
       type: Date
+    },
+    passwordResetOtp: {
+      type: String,
+      select: false
+    },
+    passwordResetOtpExpires: {
+      type: Date
+    },
+    passwordResetAttempts: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    passwordResetResendCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    passwordResetLockedUntil: {
+      type: Date
+    },
+    lastPasswordResetAt: {
+      type: Date
     }
   },
   {

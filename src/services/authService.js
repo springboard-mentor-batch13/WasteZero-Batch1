@@ -9,7 +9,8 @@ const {
   MAX_OTP_ATTEMPTS,
   MAX_OTP_RESEND,
   OTP_COOLDOWN_SECONDS,
-  OTP_LOCK_HOURS
+  OTP_LOCK_HOURS,
+  SALT_ROUNDS
 } = require('../constants/security');
 
 const register = async ({ name, email, password, role, skills, location, bio }) => {
@@ -183,4 +184,113 @@ const generateAndStoreOtp = async (user) => {
   );
 };
 
-module.exports = { register, login, verifyEmail, resendOtp };
+const forgotPassword = async (email) => {
+  const user = await User.findOne({ email }).lean();
+  if (!user) {
+    return { message: 'If an account exists with this email, a reset code has been sent' };
+  }
+
+  if (user.lastPasswordResetAt) {
+    const cooldownMs = OTP_COOLDOWN_SECONDS * 1000;
+    const timeSinceLastReset = Date.now() - new Date(user.lastPasswordResetAt).getTime();
+    if (timeSinceLastReset < cooldownMs) {
+      const remainingSec = Math.ceil((cooldownMs - timeSinceLastReset) / 1000);
+      throw ApiError.badRequest(`Please wait ${remainingSec} seconds before requesting a new reset code`);
+    }
+  }
+
+  const otp = generateOtp();
+  const hashedOtp = await hashOtp(otp);
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  let emailSent = true;
+  try {
+    await sendOtpEmail(user.email, otp, 'forgotPassword');
+  } catch (err) {
+    emailSent = false;
+  }
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        passwordResetOtp: hashedOtp,
+        passwordResetOtpExpires: expiresAt,
+        passwordResetAttempts: 0,
+        passwordResetResendCount: 0,
+        passwordResetLockedUntil: null,
+        lastPasswordResetAt: new Date()
+      }
+    }
+  );
+
+  if (!emailSent) {
+    return { message: 'If an account exists with this email, a reset code has been sent', warning: 'Email could not be sent. Please try again later.' };
+  }
+
+  return { message: 'If an account exists with this email, a reset code has been sent' };
+};
+
+const resetPassword = async (email, otp, newPassword) => {
+  const user = await User.findOne({ email }).select('+passwordResetOtp');
+  if (!user) {
+    throw ApiError.badRequest('Invalid request');
+  }
+
+  if (user.passwordResetLockedUntil) {
+    if (user.passwordResetLockedUntil > new Date()) {
+      const remainingMs = user.passwordResetLockedUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      throw ApiError.badRequest(`Too many attempts. Try again in ${remainingMin} minutes`);
+    }
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { passwordResetAttempts: 0 },
+        $unset: { passwordResetLockedUntil: '' }
+      }
+    );
+  }
+
+  if (!user.passwordResetOtpExpires || user.passwordResetOtpExpires < new Date()) {
+    throw ApiError.badRequest('Reset code has expired. Please request a new one');
+  }
+
+  const isValid = await verifyOtp(otp, user.passwordResetOtp);
+  if (!isValid) {
+    const attempts = (user.passwordResetAttempts || 0) + 1;
+
+    const updateData = { passwordResetAttempts: attempts };
+
+    if (attempts >= MAX_OTP_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + OTP_LOCK_HOURS * 60 * 60 * 1000);
+      updateData.passwordResetLockedUntil = lockUntil;
+    }
+
+    await User.updateOne({ _id: user._id }, updateData);
+
+    throw ApiError.badRequest('Invalid reset code');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        password: hashedPassword,
+        passwordResetOtp: null,
+        passwordResetOtpExpires: null,
+        passwordResetAttempts: 0,
+        passwordResetResendCount: 0,
+        passwordResetLockedUntil: null,
+        lastPasswordResetAt: new Date()
+      }
+    }
+  );
+
+  return { message: 'Password updated successfully. Please log in again using your new password.' };
+};
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword };

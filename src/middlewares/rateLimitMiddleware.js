@@ -27,4 +27,16 @@ const resendOtpLimiter = createLimiter(
   'Too many resend requests. Please wait before requesting again.'
 );
 
-module.exports = { verifyOtpLimiter, resendOtpLimiter };
+const forgotPasswordLimiter = createLimiter(
+  60 * 1000,
+  3,
+  'Too many password reset requests. Please try again later.'
+);
+
+const resetPasswordLimiter = createLimiter(
+  60 * 1000,
+  5,
+  'Too many reset attempts. Please try again later.'
+);
+
+module.exports = { verifyOtpLimiter, resendOtpLimiter, forgotPasswordLimiter, resetPasswordLimiter };
