@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const routes = require('./routes/index');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 
@@ -9,6 +10,20 @@ const app = express();
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
+
+const globalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 100,
+  message: {
+    success: false,
+    message: 'Too many requests. Please try again later.',
+    errors: [],
+    timestamp: new Date().toISOString()
+  },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use(globalLimiter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({

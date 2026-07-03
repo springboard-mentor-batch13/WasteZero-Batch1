@@ -15,8 +15,20 @@ const createLimiter = (windowMs, max, message) => {
   });
 };
 
+const loginLimiter = createLimiter(
+  15 * 60 * 1000,
+  5,
+  'Too many login attempts. Please try again after 15 minutes.'
+);
+
+const registerLimiter = createLimiter(
+  60 * 60 * 1000,
+  5,
+  'Too many registration attempts. Please try again after an hour.'
+);
+
 const verifyOtpLimiter = createLimiter(
-  60 * 1000,
+  10 * 60 * 1000,
   5,
   'Too many verification attempts. Please try again later.'
 );
@@ -28,15 +40,29 @@ const resendOtpLimiter = createLimiter(
 );
 
 const forgotPasswordLimiter = createLimiter(
-  60 * 1000,
+  60 * 60 * 1000,
   3,
-  'Too many password reset requests. Please try again later.'
+  'Too many password reset requests. Please try again after an hour.'
 );
 
 const resetPasswordLimiter = createLimiter(
-  60 * 1000,
+  10 * 60 * 1000,
   5,
   'Too many reset attempts. Please try again later.'
 );
 
-module.exports = { verifyOtpLimiter, resendOtpLimiter, forgotPasswordLimiter, resetPasswordLimiter };
+const refreshTokenLimiter = createLimiter(
+  60 * 1000,
+  20,
+  'Too many refresh requests. Please try again later.'
+);
+
+module.exports = {
+  loginLimiter,
+  registerLimiter,
+  verifyOtpLimiter,
+  resendOtpLimiter,
+  forgotPasswordLimiter,
+  resetPasswordLimiter,
+  refreshTokenLimiter
+};

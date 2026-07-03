@@ -11,7 +11,9 @@ const {
   MAX_OTP_RESEND,
   OTP_COOLDOWN_SECONDS,
   OTP_LOCK_HOURS,
-  SALT_ROUNDS
+  SALT_ROUNDS,
+  LOGIN_MAX_ATTEMPTS,
+  LOGIN_LOCK_MINUTES
 } = require('../constants/security');
 
 const register = async ({ name, email, password, role, skills, location, bio }, req = {}) => {
@@ -55,19 +57,46 @@ const register = async ({ name, email, password, role, skills, location, bio }, 
 };
 
 const login = async ({ email, password, rememberMe }, req = {}) => {
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ email }).select('+password +loginAttempts +loginLockedUntil');
   if (!user) {
-    throw ApiError.unauthorized('Invalid email or password');
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
     throw ApiError.unauthorized('Invalid email or password');
   }
 
   if (!user.isEmailVerified) {
     throw ApiError.forbidden('Please verify your email before logging in');
   }
+
+  if (user.loginLockedUntil && user.loginLockedUntil > new Date()) {
+    const remainingMs = user.loginLockedUntil.getTime() - Date.now();
+    const remainingMin = Math.ceil(remainingMs / 60000);
+    throw ApiError.tooMany(`Account locked. Try again in ${remainingMin} minutes`);
+  }
+
+  if (user.loginLockedUntil && user.loginLockedUntil <= new Date()) {
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { loginAttempts: 0, loginLockedUntil: null } }
+    );
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    const attempts = (user.loginAttempts || 0) + 1;
+    const updateData = { loginAttempts: attempts };
+
+    if (attempts >= LOGIN_MAX_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + LOGIN_LOCK_MINUTES * 60 * 1000);
+      updateData.loginLockedUntil = lockUntil;
+    }
+
+    await User.updateOne({ _id: user._id }, updateData);
+    throw ApiError.unauthorized('Invalid email or password');
+  }
+
+  await User.updateOne(
+    { _id: user._id },
+    { $set: { loginAttempts: 0, loginLockedUntil: null } }
+  );
 
   const accessToken = tokenService.generateAccessToken(user._id, user.role);
   const userAgent = req.headers ? req.headers['user-agent'] || '' : '';

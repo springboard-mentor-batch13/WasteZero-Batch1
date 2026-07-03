@@ -96,6 +96,14 @@ const userSchema = new mongoose.Schema(
     },
     lastPasswordResetAt: {
       type: Date
+    },
+    loginAttempts: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    loginLockedUntil: {
+      type: Date
     }
   },
   {
