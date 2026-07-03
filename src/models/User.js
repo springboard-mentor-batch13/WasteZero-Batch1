@@ -45,6 +45,33 @@ const userSchema = new mongoose.Schema(
       trim: true,
       maxlength: [500, 'Bio must not exceed 500 characters'],
       default: ''
+    },
+    isEmailVerified: {
+      type: Boolean,
+      default: false
+    },
+    emailVerificationOtp: {
+      type: String,
+      select: false
+    },
+    emailVerificationOtpExpires: {
+      type: Date
+    },
+    emailVerificationAttempts: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    emailVerificationResendCount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    emailVerificationLockedUntil: {
+      type: Date
+    },
+    lastOtpSentAt: {
+      type: Date
     }
   },
   {

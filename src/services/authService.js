@@ -2,6 +2,15 @@ const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
 const { generateToken, sanitizeUser } = require('../utils/token');
+const { generateOtp, hashOtp, verifyOtp } = require('./otpService');
+const { sendOtpEmail } = require('./emailService');
+const {
+  OTP_EXPIRY_MINUTES,
+  MAX_OTP_ATTEMPTS,
+  MAX_OTP_RESEND,
+  OTP_COOLDOWN_SECONDS,
+  OTP_LOCK_HOURS
+} = require('../constants/security');
 
 const register = async ({ name, email, password, role, skills, location, bio }) => {
   const existingUser = await User.findOne({ email }).lean();
@@ -21,9 +30,21 @@ const register = async ({ name, email, password, role, skills, location, bio }) 
     bio: bio || ''
   });
 
-  const token = generateToken(user._id, user.role);
+  let emailWarning = false;
+  try {
+    await generateAndStoreOtp(user);
+  } catch (err) {
+    emailWarning = true;
+  }
 
-  return { token, user: sanitizeUser(user) };
+  const token = generateToken(user._id, user.role);
+  const result = { token, user: sanitizeUser(user) };
+
+  if (emailWarning) {
+    result.warning = 'Account created but verification email could not be sent. You can request a new OTP from the resend endpoint.';
+  }
+
+  return result;
 };
 
 const login = async ({ email, password }) => {
@@ -37,9 +58,129 @@ const login = async ({ email, password }) => {
     throw ApiError.unauthorized('Invalid email or password');
   }
 
+  if (!user.isEmailVerified) {
+    throw ApiError.forbidden('Please verify your email before logging in');
+  }
+
   const token = generateToken(user._id, user.role);
 
   return { token, user: sanitizeUser(user) };
 };
 
-module.exports = { register, login };
+const verifyEmail = async (email, otp) => {
+  const user = await User.findOne({ email }).select('+emailVerificationOtp');
+  if (!user) {
+    throw ApiError.notFound('User not found with this email');
+  }
+
+  if (user.isEmailVerified) {
+    return { message: 'Email already verified' };
+  }
+
+  if (user.emailVerificationLockedUntil) {
+    if (user.emailVerificationLockedUntil > new Date()) {
+      const remainingMs = user.emailVerificationLockedUntil.getTime() - Date.now();
+      const remainingMin = Math.ceil(remainingMs / 60000);
+      throw ApiError.badRequest(`Too many attempts. Try again in ${remainingMin} minutes`);
+    }
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: { emailVerificationAttempts: 0 },
+        $unset: { emailVerificationLockedUntil: '' }
+      }
+    );
+  }
+
+  if (!user.emailVerificationOtpExpires || user.emailVerificationOtpExpires < new Date()) {
+    throw ApiError.badRequest('OTP has expired. Please request a new one');
+  }
+
+  const isValid = await verifyOtp(otp, user.emailVerificationOtp);
+  if (!isValid) {
+    const attempts = (user.emailVerificationAttempts || 0) + 1;
+
+    const updateData = { emailVerificationAttempts: attempts };
+
+    if (attempts >= MAX_OTP_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + OTP_LOCK_HOURS * 60 * 60 * 1000);
+      updateData.emailVerificationLockedUntil = lockUntil;
+    }
+
+    await User.updateOne({ _id: user._id }, updateData);
+
+    throw ApiError.badRequest('Invalid OTP');
+  }
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        isEmailVerified: true,
+        emailVerificationOtp: null,
+        emailVerificationOtpExpires: null,
+        emailVerificationAttempts: 0,
+        emailVerificationResendCount: 0,
+        emailVerificationLockedUntil: null,
+        lastOtpSentAt: null
+      }
+    }
+  );
+
+  return { message: 'Email verified successfully' };
+};
+
+const resendOtp = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw ApiError.notFound('User not found with this email');
+  }
+
+  if (user.isEmailVerified) {
+    throw ApiError.badRequest('Email is already verified');
+  }
+
+  if (user.emailVerificationResendCount >= MAX_OTP_RESEND) {
+    throw ApiError.badRequest('Maximum resend limit reached. Please try again later');
+  }
+
+  if (user.lastOtpSentAt) {
+    const cooldownMs = OTP_COOLDOWN_SECONDS * 1000;
+    const timeSinceLastOtp = Date.now() - user.lastOtpSentAt.getTime();
+    if (timeSinceLastOtp < cooldownMs) {
+      const remainingSec = Math.ceil((cooldownMs - timeSinceLastOtp) / 1000);
+      throw ApiError.badRequest(`Please wait ${remainingSec} seconds before requesting a new OTP`);
+    }
+  }
+
+  await generateAndStoreOtp(user);
+  await User.updateOne(
+    { _id: user._id },
+    { $inc: { emailVerificationResendCount: 1 } }
+  );
+
+  return { message: 'OTP sent successfully' };
+};
+
+const generateAndStoreOtp = async (user) => {
+  const otp = generateOtp();
+  const hashedOtp = await hashOtp(otp);
+  const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60 * 1000);
+
+  await sendOtpEmail(user.email, otp);
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        emailVerificationOtp: hashedOtp,
+        emailVerificationOtpExpires: expiresAt,
+        emailVerificationAttempts: 0,
+        lastOtpSentAt: new Date()
+      }
+    }
+  );
+};
+
+module.exports = { register, login, verifyEmail, resendOtp };
