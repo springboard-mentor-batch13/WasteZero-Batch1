@@ -115,7 +115,18 @@ See `src/docs/database.md` for full ER diagram and indexes.
 | Method | Route | Auth | Role | Description |
 |--------|-------|------|------|-------------|
 | POST | /register | ❌ | Any | Register new user (volunteer/ngo/admin) |
-| POST | /login | ❌ | Any | Login, returns JWT |
+| POST | /login | ❌ | Any | Login, returns JWT + refresh token |
+| POST | /verify-email | ❌ | Any | Verify email with OTP |
+| POST | /resend-otp | ❌ | Any | Resend email verification OTP |
+| POST | /forgot-password | ❌ | Any | Request password reset OTP |
+| POST | /reset-password | ❌ | Any | Reset password with OTP |
+| POST | /refresh-token | ❌ | Any | Rotate refresh token, get new access token |
+| POST | /logout | JWT | Any | Revoke current refresh token |
+| POST | /verify-2fa | ❌ | Any | Verify 2FA OTP (after login if enabled) |
+| POST | /resend-2fa | ❌ | Any | Resend 2FA OTP |
+| GET | /session | JWT | Any | Validate session, get user + token info |
+| POST | /revoke | JWT | Any | Revoke a specific refresh token |
+| POST | /logout-all | JWT | Any | Logout from all devices |
 
 ### Users (`/api/v1/users`)
 
@@ -145,6 +156,12 @@ See `src/docs/database.md` for full ER diagram and indexes.
 - **Forbidden fields** — server-managed fields blocked from client
 - **Helmet** — security headers
 - **CORS** — cross-origin protection
+- **Rate limiting** — two-layer defense (global 100 req/min + route-specific limits)
+- **Account lockout** — 5 failed login attempts → 30 min auto-unlock
+- **Two-factor authentication** — optional TOTP via email
+- **Session management** — refresh tokens with rotation, revocation, and remember me
+- **Password policy** — min 8 chars, uppercase, lowercase, number, special char
+- **Email OTP verification** — bcrypt hashed, rate limited, auto-lock on abuse
 - **No console.log** — all logging via Winston
 
 ## Scripts
@@ -167,4 +184,4 @@ Developed as part of Infosys Springboard 7.0 Virtual Internship.
 
 ---
 
-**Status:** Backend Foundation ✅ Verified & Frozen
+**Status:** Advanced Security ✅ A1–A7 Frozen
