@@ -81,15 +81,19 @@ const login = async ({ email, password, rememberMe }, req = {}) => {
 
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    const attempts = (user.loginAttempts || 0) + 1;
-    const updateData = { loginAttempts: attempts };
+    await User.updateOne(
+      { _id: user._id },
+      { $inc: { loginAttempts: 1 } }
+    );
 
-    if (attempts >= LOGIN_MAX_ATTEMPTS) {
-      const lockUntil = new Date(Date.now() + LOGIN_LOCK_MINUTES * 60 * 1000);
-      updateData.loginLockedUntil = lockUntil;
+    const updatedUser = await User.findById(user._id).select('loginAttempts').lean();
+    if (updatedUser.loginAttempts >= LOGIN_MAX_ATTEMPTS) {
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { loginLockedUntil: new Date(Date.now() + LOGIN_LOCK_MINUTES * 60 * 1000) } }
+      );
     }
 
-    await User.updateOne({ _id: user._id }, updateData);
     throw ApiError.unauthorized('Invalid email or password');
   }
 

@@ -19,14 +19,23 @@ const sendOtpEmail = async (toEmail, otp, templateName = 'verifyEmail') => {
   const html = loadTemplate(filename, otp);
   const subject = SUBJECTS[templateName] || SUBJECTS.verifyEmail;
 
-  await transporter.sendMail({
-    from: fromEmail,
-    to: toEmail,
-    subject,
-    html
-  });
+  try {
+    await transporter.sendMail({
+      from: fromEmail,
+      to: toEmail,
+      subject,
+      html
+    });
 
-  logger.info(`${templateName} email dispatched successfully to ${maskEmail(toEmail)}`);
+    logger.info(`${templateName} email dispatched successfully to ${maskEmail(toEmail)}`);
+  } catch (error) {
+    logger.error(`Email send failed [${templateName}] to ${maskEmail(toEmail)}: ${error.message}`, {
+      errorCode: error.code,
+      responseCode: error.responseCode,
+      command: error.command
+    });
+    throw error;
+  }
 };
 
 const maskEmail = (email) => {
