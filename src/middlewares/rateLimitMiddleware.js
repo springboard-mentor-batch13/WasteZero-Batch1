@@ -57,6 +57,12 @@ const refreshTokenLimiter = createLimiter(
   'Too many refresh requests. Please try again later.'
 );
 
+const sessionLimiter = createLimiter(
+  60 * 1000,
+  60,
+  'Too many session requests. Please try again later.'
+);
+
 module.exports = {
   loginLimiter,
   registerLimiter,
@@ -64,5 +70,6 @@ module.exports = {
   resendOtpLimiter,
   forgotPasswordLimiter,
   resetPasswordLimiter,
-  refreshTokenLimiter
+  refreshTokenLimiter,
+  sessionLimiter
 };

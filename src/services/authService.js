@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
+const RefreshToken = require('../models/RefreshToken');
 const ApiError = require('../utils/ApiError');
 const logger = require('../config/logger');
 const { sanitizeUser } = require('../utils/token');
@@ -577,4 +578,28 @@ const logout = async (plainRefreshToken) => {
   return { message: 'Logged out successfully' };
 };
 
-module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };
+const sessionInfo = async (userId, exp) => {
+  const user = await User.findById(userId).lean();
+  if (!user) {
+    throw ApiError.notFound('User not found');
+  }
+
+  const expiresInMinutes = Math.max(0, Math.floor((exp * 1000 - Date.now()) / 60000));
+
+  const latestToken = await RefreshToken.findOne(
+    { user: userId, isRevoked: false, expiresAt: { $gt: new Date() } },
+    { rememberMe: 1, createdAt: 1 },
+    { sort: { createdAt: -1 } }
+  ).lean();
+
+  return {
+    user: sanitizeUser(user),
+    session: {
+      issuedAt: user.createdAt,
+      expiresInMinutes,
+      rememberMe: latestToken ? latestToken.rememberMe : false
+    }
+  };
+};
+
+module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, sessionInfo };

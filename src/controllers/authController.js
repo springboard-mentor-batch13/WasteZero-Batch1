@@ -111,4 +111,9 @@ const resend2faOtp = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, result.message, result);
 });
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp };
+const getSession = asyncHandler(async (req, res) => {
+  const result = await authService.sessionInfo(req.user.id, req.user.exp);
+  return ApiResponse.ok(res, 'Session retrieved successfully', result);
+});
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp, getSession };
