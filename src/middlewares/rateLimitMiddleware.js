@@ -63,6 +63,12 @@ const sessionLimiter = createLimiter(
   'Too many session requests. Please try again later.'
 );
 
+const revokeLimiter = createLimiter(
+  15 * 60 * 1000,
+  5,
+  'Too many token revocation attempts. Please try again after 15 minutes.'
+);
+
 module.exports = {
   loginLimiter,
   registerLimiter,
@@ -71,5 +77,6 @@ module.exports = {
   forgotPasswordLimiter,
   resetPasswordLimiter,
   refreshTokenLimiter,
-  sessionLimiter
+  sessionLimiter,
+  revokeLimiter
 };

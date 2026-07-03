@@ -1,6 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/ApiResponse');
-const { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa } = require('../validators/authValidator');
+const { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa, validateRevokeToken } = require('../validators/authValidator');
 const { validateVerifyEmail, validateResendOtp, validateForgotPassword, validateResetPassword } = require('../validators/emailValidator');
 const authService = require('../services/authService');
 
@@ -87,7 +87,7 @@ const logout = asyncHandler(async (req, res) => {
     return ApiResponse.validationError(res, error);
   }
 
-  const result = await authService.logout(value.refreshToken);
+  const result = await authService.logout(value.refreshToken, req.user.id);
   return ApiResponse.ok(res, result.message, result);
 });
 
@@ -116,4 +116,14 @@ const getSession = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, 'Session retrieved successfully', result);
 });
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp, getSession };
+const revokeToken = asyncHandler(async (req, res) => {
+  const { error, value } = validateRevokeToken(req.body);
+  if (error) {
+    return ApiResponse.validationError(res, error);
+  }
+
+  const result = await authService.revokeToken(req.user.id, value.refreshToken);
+  return ApiResponse.ok(res, result.message);
+});
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp, getSession, revokeToken };

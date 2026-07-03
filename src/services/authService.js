@@ -573,8 +573,8 @@ const refreshToken = async (plainRefreshToken) => {
   return { accessToken, refreshToken: newRefreshToken, expiresAt, user: sanitizeUser(user) };
 };
 
-const logout = async (plainRefreshToken) => {
-  await tokenService.revokeRefreshToken(plainRefreshToken);
+const logout = async (plainRefreshToken, userId) => {
+  const result = await tokenService.revokeRefreshToken(plainRefreshToken, userId);
   return { message: 'Logged out successfully' };
 };
 
@@ -602,4 +602,9 @@ const sessionInfo = async (userId, exp) => {
   };
 };
 
-module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, sessionInfo };
+const revokeToken = async (userId, rawToken) => {
+  await tokenService.revokeRefreshToken(rawToken, userId);
+  return { message: 'Token revoked successfully' };
+};
+
+module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, sessionInfo, revokeToken };

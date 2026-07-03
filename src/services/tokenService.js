@@ -78,20 +78,37 @@ const rotateRefreshToken = async (oldPlainToken, userId, rememberMe = false, use
   return generateRefreshToken(userId, rememberMe, userAgent, ipAddress);
 };
 
-const revokeRefreshToken = async (plainToken) => {
+const revokeRefreshToken = async (plainToken, currentUserId) => {
   const tokenHash = hashToken(plainToken);
+  const doc = await RefreshToken.findOne({ tokenHash });
+
+  if (!doc) {
+    return { revoked: false };
+  }
+
+  if (currentUserId && doc.user.toString() !== currentUserId.toString()) {
+    return { revoked: false };
+  }
+
+  if (doc.isRevoked) {
+    return { revoked: false };
+  }
 
   await RefreshToken.updateOne(
-    { tokenHash },
+    { _id: doc._id },
     { $set: { isRevoked: true, revokedAt: new Date() } }
   );
+
+  return { revoked: true };
 };
 
 const revokeAllUserTokens = async (userId) => {
-  await RefreshToken.updateMany(
+  const result = await RefreshToken.updateMany(
     { user: userId, isRevoked: false },
     { $set: { isRevoked: true, revokedAt: new Date() } }
   );
+
+  return result.modifiedCount;
 };
 
 module.exports = {

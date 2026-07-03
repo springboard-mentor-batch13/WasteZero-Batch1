@@ -76,5 +76,6 @@ const validateLogin = (data) => loginSchema.validate(data, { abortEarly: false }
 const validateRefreshToken = (data) => refreshTokenSchema.validate(data, { abortEarly: false });
 const validateVerify2fa = (data) => verify2faSchema.validate(data, { abortEarly: false });
 const validateResend2fa = (data) => resend2faSchema.validate(data, { abortEarly: false });
+const validateRevokeToken = (data) => refreshTokenSchema.validate(data, { abortEarly: false });
 
-module.exports = { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa, passwordSchema };
+module.exports = { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa, validateRevokeToken, passwordSchema };

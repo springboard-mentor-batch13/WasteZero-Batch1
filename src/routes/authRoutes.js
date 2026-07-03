@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const rateLimit = require('express-rate-limit');
 const authController = require('../controllers/authController');
-const { loginLimiter, registerLimiter, verifyOtpLimiter, resendOtpLimiter, forgotPasswordLimiter, resetPasswordLimiter, refreshTokenLimiter, sessionLimiter } = require('../middlewares/rateLimitMiddleware');
+const { loginLimiter, registerLimiter, verifyOtpLimiter, resendOtpLimiter, forgotPasswordLimiter, resetPasswordLimiter, refreshTokenLimiter, sessionLimiter, revokeLimiter } = require('../middlewares/rateLimitMiddleware');
 
 const resend2faLimiter = rateLimit({
   windowMs: 30 * 1000,
@@ -28,5 +28,6 @@ router.post('/logout', authController.logout);
 router.post('/verify-2fa', verifyOtpLimiter, authController.verify2fa);
 router.post('/resend-2fa', resend2faLimiter, authController.resend2faOtp);
 router.get('/session', sessionLimiter, authController.getSession);
+router.post('/revoke', revokeLimiter, authController.revokeToken);
 
 module.exports = router;
