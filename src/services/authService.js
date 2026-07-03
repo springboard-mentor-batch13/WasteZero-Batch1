@@ -578,7 +578,7 @@ const logout = async (plainRefreshToken, userId) => {
   return { message: 'Logged out successfully' };
 };
 
-const sessionInfo = async (userId, exp) => {
+const sessionInfo = async (userId, exp, iat) => {
   const user = await User.findById(userId).lean();
   if (!user) {
     throw ApiError.notFound('User not found');
@@ -595,9 +595,10 @@ const sessionInfo = async (userId, exp) => {
   return {
     user: sanitizeUser(user),
     session: {
-      issuedAt: user.createdAt,
+      issuedAt: new Date(iat * 1000).toISOString(),
       expiresInMinutes,
-      rememberMe: latestToken ? latestToken.rememberMe : false
+      rememberMe: latestToken ? latestToken.rememberMe : false,
+      accountLockedUntil: user.loginLockedUntil || null
     }
   };
 };

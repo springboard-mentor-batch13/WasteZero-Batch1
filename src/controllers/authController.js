@@ -112,7 +112,7 @@ const resend2faOtp = asyncHandler(async (req, res) => {
 });
 
 const getSession = asyncHandler(async (req, res) => {
-  const result = await authService.sessionInfo(req.user.id, req.user.exp);
+  const result = await authService.sessionInfo(req.user.id, req.user.exp, req.user.iat);
   return ApiResponse.ok(res, 'Session retrieved successfully', result);
 });
 
