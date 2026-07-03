@@ -126,4 +126,9 @@ const revokeToken = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, result.message);
 });
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp, getSession, revokeToken };
+const logoutAll = asyncHandler(async (req, res) => {
+  const result = await authService.logoutAll(req.user.id);
+  return ApiResponse.ok(res, result.message, { revokedSessions: result.revokedSessions });
+});
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp, getSession, revokeToken, logoutAll };

@@ -607,4 +607,9 @@ const revokeToken = async (userId, rawToken) => {
   return { message: 'Token revoked successfully' };
 };
 
-module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, sessionInfo, revokeToken };
+const logoutAll = async (userId) => {
+  const revokedSessions = await tokenService.revokeAllUserTokens(userId);
+  return { message: 'Logged out from all devices.', revokedSessions };
+};
+
+module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, sessionInfo, revokeToken, logoutAll };
