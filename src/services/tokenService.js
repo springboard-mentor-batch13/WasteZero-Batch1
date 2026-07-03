@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const RefreshToken = require('../models/RefreshToken');
 const {
   ACCESS_TOKEN_EXPIRY_MINUTES,
@@ -51,6 +52,15 @@ const verifyRefreshToken = async (plainToken) => {
   }
 
   if (doc.expiresAt < new Date()) {
+    return null;
+  }
+
+  const user = await User.findById(doc.user).lean();
+  if (!user) {
+    await RefreshToken.updateOne(
+      { _id: doc._id },
+      { $set: { isRevoked: true, revokedAt: new Date() } }
+    );
     return null;
   }
 

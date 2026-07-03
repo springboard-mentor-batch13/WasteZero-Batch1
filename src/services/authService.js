@@ -14,7 +14,7 @@ const {
   SALT_ROUNDS
 } = require('../constants/security');
 
-const register = async ({ name, email, password, role, skills, location, bio }) => {
+const register = async ({ name, email, password, role, skills, location, bio }, req = {}) => {
   const existingUser = await User.findOne({ email }).lean();
   if (existingUser) {
     throw ApiError.conflict('A user with this email already exists');
@@ -40,7 +40,11 @@ const register = async ({ name, email, password, role, skills, location, bio }) 
   }
 
   const accessToken = tokenService.generateAccessToken(user._id, user.role);
-  const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(user._id);
+  const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
+  const ipAddress = req.ip || req.connection?.remoteAddress || '';
+  const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
+    user._id, false, userAgent, ipAddress
+  );
   const result = { accessToken, refreshToken, expiresAt, user: sanitizeUser(user) };
 
   if (emailWarning) {
@@ -304,6 +308,11 @@ const refreshToken = async (plainRefreshToken) => {
   const user = await User.findById(doc.user).lean();
   if (!user) {
     throw ApiError.unauthorized('User not found');
+  }
+
+  if (!user.isEmailVerified) {
+    await tokenService.revokeRefreshToken(plainRefreshToken);
+    throw ApiError.forbidden('Email not verified. Please verify your email before refreshing session');
   }
 
   const accessToken = tokenService.generateAccessToken(user._id, user.role);

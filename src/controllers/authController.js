@@ -10,7 +10,7 @@ const register = asyncHandler(async (req, res) => {
     return ApiResponse.validationError(res, error);
   }
 
-  const result = await authService.register(value);
+  const result = await authService.register(value, req);
   return ApiResponse.created(res, 'Registration successful', result);
 });
 
