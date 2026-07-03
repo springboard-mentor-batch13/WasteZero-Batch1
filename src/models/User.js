@@ -104,6 +104,28 @@ const userSchema = new mongoose.Schema(
     },
     loginLockedUntil: {
       type: Date
+    },
+    twoFactorEnabled: {
+      type: Boolean,
+      default: false
+    },
+    twoFactorOtp: {
+      type: String,
+      select: false
+    },
+    twoFactorOtpExpires: {
+      type: Date
+    },
+    twoFactorAttempts: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    twoFactorLockedUntil: {
+      type: Date
+    },
+    lastTwoFactorSentAt: {
+      type: Date
     }
   },
   {

@@ -54,8 +54,27 @@ const refreshTokenSchema = Joi.object({
   })
 });
 
+const verify2faSchema = Joi.object({
+  sessionToken: Joi.string().required().messages({
+    'string.empty': 'Session token is required'
+  }),
+  otp: Joi.string().length(6).pattern(/^\d{6}$/).required().messages({
+    'string.length': 'OTP must be exactly 6 digits',
+    'string.pattern.base': 'OTP must be a 6-digit number',
+    'string.empty': 'OTP is required'
+  })
+});
+
+const resend2faSchema = Joi.object({
+  sessionToken: Joi.string().required().messages({
+    'string.empty': 'Session token is required'
+  })
+});
+
 const validateRegister = (data) => registerSchema.validate(data, { abortEarly: false });
 const validateLogin = (data) => loginSchema.validate(data, { abortEarly: false });
 const validateRefreshToken = (data) => refreshTokenSchema.validate(data, { abortEarly: false });
+const validateVerify2fa = (data) => verify2faSchema.validate(data, { abortEarly: false });
+const validateResend2fa = (data) => resend2faSchema.validate(data, { abortEarly: false });
 
-module.exports = { validateRegister, validateLogin, validateRefreshToken, passwordSchema };
+module.exports = { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa, passwordSchema };

@@ -1,10 +1,12 @@
 const bcrypt = require('bcrypt');
 const User = require('../models/User');
 const ApiError = require('../utils/ApiError');
+const logger = require('../config/logger');
 const { sanitizeUser } = require('../utils/token');
 const { generateOtp, hashOtp, verifyOtp } = require('./otpService');
 const { sendOtpEmail } = require('./emailService');
 const tokenService = require('./tokenService');
+const sessionStore = require('./sessionStore');
 const {
   OTP_EXPIRY_MINUTES,
   MAX_OTP_ATTEMPTS,
@@ -13,8 +15,20 @@ const {
   OTP_LOCK_HOURS,
   SALT_ROUNDS,
   LOGIN_MAX_ATTEMPTS,
-  LOGIN_LOCK_MINUTES
+  LOGIN_LOCK_MINUTES,
+  TWO_FA_OTP_LENGTH,
+  TWO_FA_OTP_EXPIRY_SECONDS,
+  TWO_FA_MAX_ATTEMPTS,
+  TWO_FA_LOCK_HOURS,
+  TWO_FA_RESEND_COOLDOWN,
+  TWO_FA_MAX_RESENDS
 } = require('../constants/security');
+
+const maskEmail = (email) => {
+  if (!email || !email.includes('@')) return email;
+  const [local, domain] = email.split('@');
+  return `${local[0]}***@${domain}`;
+};
 
 const register = async ({ name, email, password, role, skills, location, bio }, req = {}) => {
   const existingUser = await User.findOne({ email }).lean();
@@ -102,6 +116,48 @@ const login = async ({ email, password, rememberMe }, req = {}) => {
     { $set: { loginAttempts: 0, loginLockedUntil: null } }
   );
 
+  if (user.twoFactorEnabled) {
+    const plainOtp = generateOtp(TWO_FA_OTP_LENGTH);
+    const hashedOtp = await hashOtp(plainOtp);
+
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          twoFactorOtp: hashedOtp,
+          twoFactorOtpExpires: new Date(Date.now() + TWO_FA_OTP_EXPIRY_SECONDS * 1000),
+          twoFactorAttempts: 0,
+          twoFactorLockedUntil: null,
+          lastTwoFactorSentAt: new Date()
+        }
+      }
+    );
+
+    const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
+    const ipAddress = req.ip || req.connection?.remoteAddress || '';
+    const { sessionToken, expiresAt } = sessionStore.createSession({
+      userId: user._id,
+      rememberMe,
+      ipAddress,
+      userAgent
+    });
+
+    sessionStore.updateSession(sessionToken, { otpGeneratedAt: Date.now() });
+
+    try {
+      await sendOtpEmail(user.email, plainOtp, 'twoFactor');
+    } catch {
+      logger.error(`2FA email send failed for ${maskEmail(user.email)}`);
+    }
+
+    return {
+      requires2FA: true,
+      sessionToken,
+      expiresIn: TWO_FA_OTP_EXPIRY_SECONDS,
+      message: 'Two-factor authentication required. Please check your email for the verification code.'
+    };
+  }
+
   const accessToken = tokenService.generateAccessToken(user._id, user.role);
   const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
   const ipAddress = req.ip || req.connection?.remoteAddress || '';
@@ -110,6 +166,133 @@ const login = async ({ email, password, rememberMe }, req = {}) => {
   );
 
   return { accessToken, refreshToken, expiresAt, user: sanitizeUser(user) };
+};
+
+const verify2fa = async (sessionToken, otp, req = {}) => {
+  const session = sessionStore.getSession(sessionToken);
+  if (!session) {
+    throw ApiError.badRequest('Session expired or invalid. Please log in again.');
+  }
+
+  const user = await User.findById(session.userId).select('+twoFactorOtp');
+  if (!user) {
+    sessionStore.deleteSession(sessionToken);
+    throw ApiError.unauthorized('User not found');
+  }
+
+  if (user.twoFactorLockedUntil && user.twoFactorLockedUntil > new Date()) {
+    const remainingMs = user.twoFactorLockedUntil.getTime() - Date.now();
+    const remainingMin = Math.ceil(remainingMs / 60000);
+    throw ApiError.tooMany(`Too many 2FA attempts. Try again in ${remainingMin} minutes`);
+  }
+
+  if (user.twoFactorLockedUntil && user.twoFactorLockedUntil <= new Date()) {
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { twoFactorAttempts: 0, twoFactorLockedUntil: null } }
+    );
+  }
+
+  if (!user.twoFactorOtpExpires || user.twoFactorOtpExpires < new Date()) {
+    sessionStore.deleteSession(sessionToken);
+    throw ApiError.badRequest('OTP expired. Please request a new code.');
+  }
+
+  const isValid = await verifyOtp(otp, user.twoFactorOtp);
+  if (!isValid) {
+    await User.updateOne(
+      { _id: user._id },
+      { $inc: { twoFactorAttempts: 1 } }
+    );
+
+    const updatedUser = await User.findById(user._id).select('twoFactorAttempts').lean();
+    if (updatedUser.twoFactorAttempts >= TWO_FA_MAX_ATTEMPTS) {
+      const lockUntil = new Date(Date.now() + TWO_FA_LOCK_HOURS * 60 * 60 * 1000);
+      await User.updateOne(
+        { _id: user._id },
+        { $set: { twoFactorLockedUntil: lockUntil } }
+      );
+      sessionStore.deleteSession(sessionToken);
+      throw ApiError.tooMany('Too many invalid attempts. 2FA locked for 1 hour.');
+    }
+
+    throw ApiError.badRequest('Invalid verification code');
+  }
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        twoFactorOtp: null,
+        twoFactorOtpExpires: null,
+        twoFactorAttempts: 0,
+        twoFactorLockedUntil: null
+      }
+    }
+  );
+
+  sessionStore.deleteSession(sessionToken);
+
+  const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
+  const ipAddress = req.ip || req.connection?.remoteAddress || '';
+  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
+    user._id, session.rememberMe, userAgent, ipAddress
+  );
+
+  return { accessToken, refreshToken, expiresAt, user: sanitizeUser(user) };
+};
+
+const resend2faOtp = async (sessionToken) => {
+  const session = sessionStore.getSession(sessionToken);
+  if (!session) {
+    throw ApiError.badRequest('Session expired or invalid. Please log in again.');
+  }
+
+  const user = await User.findById(session.userId);
+  if (!user) {
+    sessionStore.deleteSession(sessionToken);
+    throw ApiError.unauthorized('User not found');
+  }
+
+  if (session.otpGeneratedAt && (Date.now() - session.otpGeneratedAt) < TWO_FA_RESEND_COOLDOWN * 1000) {
+    const remaining = Math.ceil((TWO_FA_RESEND_COOLDOWN * 1000 - (Date.now() - session.otpGeneratedAt)) / 1000);
+    throw ApiError.tooMany(`Please wait ${remaining} seconds before requesting a new code.`);
+  }
+
+  if (session.resendCount >= TWO_FA_MAX_RESENDS) {
+    sessionStore.deleteSession(sessionToken);
+    throw ApiError.tooMany('Maximum resend limit reached. Please log in again.');
+  }
+
+  const plainOtp = generateOtp(TWO_FA_OTP_LENGTH);
+  const hashedOtp = await hashOtp(plainOtp);
+
+  await User.updateOne(
+    { _id: user._id },
+    {
+      $set: {
+        twoFactorOtp: hashedOtp,
+        twoFactorOtpExpires: new Date(Date.now() + TWO_FA_OTP_EXPIRY_SECONDS * 1000),
+        twoFactorAttempts: 0,
+        twoFactorLockedUntil: null,
+        lastTwoFactorSentAt: new Date()
+      }
+    }
+  );
+
+  sessionStore.updateSession(sessionToken, {
+    otpGeneratedAt: Date.now(),
+    resendCount: session.resendCount + 1
+  });
+
+  try {
+    await sendOtpEmail(user.email, plainOtp, 'twoFactor');
+  } catch {
+    logger.error(`2FA resend email failed for ${maskEmail(user.email)}`);
+  }
+
+  return { message: 'Verification code resent. Please check your email.' };
 };
 
 const verifyEmail = async (email, otp) => {
@@ -364,4 +547,4 @@ const logout = async (plainRefreshToken) => {
   return { message: 'Logged out successfully' };
 };
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };
+module.exports = { register, login, verify2fa, resend2faOtp, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };

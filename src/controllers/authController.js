@@ -1,6 +1,6 @@
 const asyncHandler = require('../utils/asyncHandler');
 const ApiResponse = require('../utils/ApiResponse');
-const { validateRegister, validateLogin, validateRefreshToken } = require('../validators/authValidator');
+const { validateRegister, validateLogin, validateRefreshToken, validateVerify2fa, validateResend2fa } = require('../validators/authValidator');
 const { validateVerifyEmail, validateResendOtp, validateForgotPassword, validateResetPassword } = require('../validators/emailValidator');
 const authService = require('../services/authService');
 
@@ -21,6 +21,13 @@ const login = asyncHandler(async (req, res) => {
   }
 
   const result = await authService.login(value, req);
+  if (result.requires2FA) {
+    return ApiResponse.ok(res, result.message, {
+      requires2FA: true,
+      sessionToken: result.sessionToken,
+      expiresIn: result.expiresIn
+    });
+  }
   return ApiResponse.ok(res, 'Login successful', result);
 });
 
@@ -84,4 +91,24 @@ const logout = asyncHandler(async (req, res) => {
   return ApiResponse.ok(res, result.message, result);
 });
 
-module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout };
+const verify2fa = asyncHandler(async (req, res) => {
+  const { error, value } = validateVerify2fa(req.body);
+  if (error) {
+    return ApiResponse.validationError(res, error);
+  }
+
+  const result = await authService.verify2fa(value.sessionToken, value.otp, req);
+  return ApiResponse.ok(res, '2FA verification successful', result);
+});
+
+const resend2faOtp = asyncHandler(async (req, res) => {
+  const { error, value } = validateResend2fa(req.body);
+  if (error) {
+    return ApiResponse.validationError(res, error);
+  }
+
+  const result = await authService.resend2faOtp(value.sessionToken);
+  return ApiResponse.ok(res, result.message, result);
+});
+
+module.exports = { register, login, verifyEmail, resendOtp, forgotPassword, resetPassword, refreshToken, logout, verify2fa, resend2faOtp };

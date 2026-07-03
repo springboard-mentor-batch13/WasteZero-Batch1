@@ -8,7 +8,8 @@ const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
 
 const SUBJECTS = {
   verifyEmail: 'Verify Your Email — WasteZero',
-  forgotPassword: 'Reset Your Password — WasteZero'
+  forgotPassword: 'Reset Your Password — WasteZero',
+  twoFactor: 'Your 2FA Code — WasteZero'
 };
 
 const sendOtpEmail = async (toEmail, otp, templateName = 'verifyEmail') => {
