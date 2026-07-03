@@ -311,7 +311,6 @@ const refreshToken = async (plainRefreshToken) => {
   }
 
   if (!user.isEmailVerified) {
-    await tokenService.revokeRefreshToken(plainRefreshToken);
     throw ApiError.forbidden('Email not verified. Please verify your email before refreshing session');
   }
 
