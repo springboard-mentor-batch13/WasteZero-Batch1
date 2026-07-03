@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { ROLES_ARRAY } = require('../constants/roles');
+const { PASSWORD_MIN_LENGTH } = require('../constants/security');
 
 const userSchema = new mongoose.Schema(
   {
@@ -20,7 +21,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters'],
+      minlength: [PASSWORD_MIN_LENGTH, `Password must be at least ${PASSWORD_MIN_LENGTH} characters`],
       select: false
     },
     role: {

@@ -1,11 +1,21 @@
 const Joi = require('joi');
 const { ROLES_ARRAY } = require('../constants/roles');
+const { PASSWORD_MIN_LENGTH, PASSWORD_MAX_LENGTH, PASSWORD_REGEX } = require('../constants/security');
 
-const passwordSchema = Joi.string().min(6).max(128).required().messages({
-  'string.min': 'Password must be at least 6 characters',
-  'string.max': 'Password must not exceed 128 characters',
-  'string.empty': 'Password is required'
-});
+const PASSWORD_MESSAGE = `Password must be ${PASSWORD_MIN_LENGTH}–${PASSWORD_MAX_LENGTH} characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character`;
+
+const passwordSchema = Joi.string()
+  .min(PASSWORD_MIN_LENGTH)
+  .max(PASSWORD_MAX_LENGTH)
+  .pattern(PASSWORD_REGEX)
+  .required()
+  .messages({
+    'string.min': PASSWORD_MESSAGE,
+    'string.max': PASSWORD_MESSAGE,
+    'string.pattern.base': PASSWORD_MESSAGE,
+    'string.empty': 'Password is required',
+    'any.required': 'Password is required'
+  });
 
 const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(50).required().messages({
