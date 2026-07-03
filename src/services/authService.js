@@ -147,7 +147,21 @@ const login = async ({ email, password, rememberMe }, req = {}) => {
     try {
       await sendOtpEmail(user.email, plainOtp, 'twoFactor');
     } catch {
-      logger.error(`2FA email send failed for ${maskEmail(user.email)}`);
+      sessionStore.deleteSession(sessionToken);
+      await User.updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            twoFactorOtp: null,
+            twoFactorOtpExpires: null,
+            twoFactorAttempts: 0,
+            twoFactorLockedUntil: null,
+            lastTwoFactorSentAt: null
+          }
+        }
+      );
+      logger.error(`2FA email send failed for ${maskEmail(user.email)} — login aborted`);
+      throw ApiError.internal('Unable to send verification code. Please try again.');
     }
 
     return {
@@ -268,6 +282,10 @@ const resend2faOtp = async (sessionToken) => {
   const plainOtp = generateOtp(TWO_FA_OTP_LENGTH);
   const hashedOtp = await hashOtp(plainOtp);
 
+  const fullUser = await User.findById(user._id).select('+twoFactorOtp');
+  const oldOtp = fullUser.twoFactorOtp;
+  const oldExpiry = fullUser.twoFactorOtpExpires;
+
   await User.updateOne(
     { _id: user._id },
     {
@@ -281,16 +299,28 @@ const resend2faOtp = async (sessionToken) => {
     }
   );
 
+  try {
+    await sendOtpEmail(user.email, plainOtp, 'twoFactor');
+  } catch {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $set: {
+          twoFactorOtp: oldOtp,
+          twoFactorOtpExpires: oldExpiry,
+          twoFactorAttempts: 0,
+          lastTwoFactorSentAt: null
+        }
+      }
+    );
+    logger.error(`2FA resend email failed for ${maskEmail(user.email)} — OTP reverted`);
+    throw ApiError.internal('Unable to send verification code. Please try again.');
+  }
+
   sessionStore.updateSession(sessionToken, {
     otpGeneratedAt: Date.now(),
     resendCount: session.resendCount + 1
   });
-
-  try {
-    await sendOtpEmail(user.email, plainOtp, 'twoFactor');
-  } catch {
-    logger.error(`2FA resend email failed for ${maskEmail(user.email)}`);
-  }
 
   return { message: 'Verification code resent. Please check your email.' };
 };

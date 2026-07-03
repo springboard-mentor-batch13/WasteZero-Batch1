@@ -3,6 +3,11 @@ const { TWO_FA_SESSION_EXPIRY_SECONDS } = require('../constants/security');
 
 const store = new Map();
 
+// IP address and userAgent are stored for audit and future use only.
+// Current implementation does NOT enforce strict IP/User-Agent binding
+// during verify-2fa. This avoids false positives from NAT/CDN/proxy changes
+// within the 5-minute session window.
+
 const createSession = ({ userId, rememberMe, ipAddress, userAgent }) => {
   const sessionToken = crypto.randomBytes(48).toString('hex');
   const expiresAt = Date.now() + TWO_FA_SESSION_EXPIRY_SECONDS * 1000;
@@ -55,6 +60,7 @@ const cleanupExpiredSessions = () => {
   }
 };
 
-setInterval(cleanupExpiredSessions, 60 * 1000);
+const interval = setInterval(cleanupExpiredSessions, 60 * 1000);
+interval.unref();
 
 module.exports = { createSession, getSession, updateSession, deleteSession };
