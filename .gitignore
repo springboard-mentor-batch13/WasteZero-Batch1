@@ -1,5 +1,6 @@
 node_modules/
 .opencode/
+postman/
 .env
 logs/
 *.log
@@ -9,4 +10,5 @@ logs/
 # Only README.md is public-facing documentation
 *.md
 *.txt
+*.pdf
 !README.md
