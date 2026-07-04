@@ -42,8 +42,10 @@
                 "exec": [
                   "pm.test('Status 201', () => pm.response.to.have.status(201));",
                   "var json = pm.response.json();",
-                  "pm.test('Has token', () => pm.expect(json.data.token).to.not.be.empty);",
-                  "pm.environment.set('token', json.data.token);",
+                  "pm.test('Has accessToken', () => pm.expect(json.data.accessToken).to.not.be.empty);",
+                  "pm.test('Has refreshToken', () => pm.expect(json.data.refreshToken).to.not.be.empty);",
+                  "pm.environment.set('token', json.data.accessToken);",
+                  "pm.environment.set('refreshToken', json.data.refreshToken);",
                   "pm.environment.set('userId', json.data.user.id);"
                 ],
                 "type": "text/javascript"
@@ -57,7 +59,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"volunteer\",\n  \"skills\": [\"sorting\", \"driving\"],\n  \"location\": \"New York\",\n  \"bio\": \"Environment enthusiast\"\n}"
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"John@123\",\n  \"role\": \"volunteer\",\n  \"skills\": [\"sorting\", \"driving\"],\n  \"location\": \"New York\",\n  \"bio\": \"Environment enthusiast\"\n}"
             },
             "url": "{{base_url}}/auth/register"
           }
@@ -71,7 +73,9 @@
                 "exec": [
                   "pm.test('Status 201', () => pm.response.to.have.status(201));",
                   "var json = pm.response.json();",
-                  "pm.environment.set('ngoToken', json.data.token);",
+                  "pm.test('Has accessToken', () => pm.expect(json.data.accessToken).to.not.be.empty);",
+                  "pm.environment.set('ngoToken', json.data.accessToken);",
+                  "pm.environment.set('ngoRefreshToken', json.data.refreshToken);",
                   "pm.environment.set('ngoId', json.data.user.id);"
                 ],
                 "type": "text/javascript"
@@ -85,7 +89,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Green Earth NGO\",\n  \"email\": \"ngo@example.com\",\n  \"password\": \"password123\",\n  \"role\": \"ngo\",\n  \"skills\": [\"management\", \"event planning\"],\n  \"location\": \"Mumbai\",\n  \"bio\": \"Environmental conservation organization\"\n}"
+              "raw": "{\n  \"name\": \"Green Earth NGO\",\n  \"email\": \"ngo@example.com\",\n  \"password\": \"Green@123\",\n  \"role\": \"ngo\",\n  \"skills\": [\"management\", \"event planning\"],\n  \"location\": \"Mumbai\",\n  \"bio\": \"Environmental conservation organization\"\n}"
             },
             "url": "{{base_url}}/auth/register"
           }
@@ -99,7 +103,10 @@
                 "exec": [
                   "pm.test('Status 200', () => pm.response.to.have.status(200));",
                   "var json = pm.response.json();",
-                  "pm.environment.set('token', json.data.token);"
+                  "pm.test('Has accessToken', () => pm.expect(json.data.accessToken).to.not.be.empty);",
+                  "pm.test('Has refreshToken', () => pm.expect(json.data.refreshToken).to.not.be.empty);",
+                  "pm.environment.set('token', json.data.accessToken);",
+                  "pm.environment.set('refreshToken', json.data.refreshToken);"
                 ],
                 "type": "text/javascript"
               }
@@ -112,9 +119,301 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"John@123\",\n  \"rememberMe\": false\n}"
             },
             "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Verify Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Email verified', () => pm.expect(pm.response.json().message).to.include('verified'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{base_url}}/auth/verify-email"
+          }
+        },
+        {
+          "name": "Resend OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": "{{base_url}}/auth/resend-otp"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Success message', () => pm.expect(pm.response.json().message).to.include('reset code'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\"\n}"
+            },
+            "url": "{{base_url}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Password reset', () => pm.expect(pm.response.json().message).to.include('Password updated'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"otp\": \"123456\",\n  \"password\": \"NewJohn@456\"\n}"
+            },
+            "url": "{{base_url}}/auth/reset-password"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var json = pm.response.json();",
+                  "pm.test('New accessToken', () => pm.expect(json.data.accessToken).to.not.be.empty);",
+                  "pm.test('New refreshToken', () => pm.expect(json.data.refreshToken).to.not.be.empty);",
+                  "pm.environment.set('token', json.data.accessToken);",
+                  "pm.environment.set('refreshToken', json.data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/refresh-token"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Logged out', () => pm.expect(pm.response.json().message).to.include('Logged out'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/logout"
+          }
+        },
+        {
+          "name": "Logout All Devices",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Logged out from all', () => pm.expect(pm.response.json().message).to.include('all devices'));",
+                  "pm.test('Has revokedSessions', () => pm.expect(pm.response.json().data.revokedSessions).to.be.above(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": "{{base_url}}/auth/logout-all"
+          }
+        },
+        {
+          "name": "Get Session",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has session data', () => pm.expect(pm.response.json().data.session).to.not.be.empty);",
+                  "pm.test('Has user', () => pm.expect(pm.response.json().data.user).to.not.be.empty);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/auth/session"
+          }
+        },
+        {
+          "name": "Revoke Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Token revoked', () => pm.expect(pm.response.json().message).to.include('revoked'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/revoke"
+          }
+        },
+        {
+          "name": "Verify 2FA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "var json = pm.response.json();",
+                  "pm.test('Has accessToken', () => pm.expect(json.data.accessToken).to.not.be.empty);",
+                  "pm.environment.set('token', json.data.accessToken);",
+                  "pm.environment.set('refreshToken', json.data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionToken\": \"{{sessionToken}}\",\n  \"otp\": \"123456\"\n}"
+            },
+            "url": "{{base_url}}/auth/verify-2fa"
+          }
+        },
+        {
+          "name": "Resend 2FA",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Code resent', () => pm.expect(pm.response.json().message).to.include('resent'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sessionToken\": \"{{sessionToken}}\"\n}"
+            },
+            "url": "{{base_url}}/auth/resend-2fa"
           }
         }
       ]
@@ -345,7 +644,17 @@
       "type": "string"
     },
     {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
       "key": "ngoToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ngoRefreshToken",
       "value": "",
       "type": "string"
     },
@@ -356,6 +665,11 @@
     },
     {
       "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sessionToken",
       "value": "",
       "type": "string"
     },
