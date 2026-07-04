@@ -1,0 +1,32 @@
+/* src/styles.scss */
+:root {
+  --primary-blue: #1a73e8;
+  --text-main: #202124;
+  --text-muted: #5f6368;
+  --bg-sidebar: #ffffff;
+  --bg-main: #fafafa;
+  --border-color: #dadce0;
+  --font-family: 'Inter', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-main);
+  background-color: var(--bg-main);
+  -webkit-font-smoothing: antialiased;
+}
+
+ul {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
