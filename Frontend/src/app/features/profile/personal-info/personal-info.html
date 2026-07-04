@@ -1,0 +1,35 @@
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="form-layout">
+  <div class="section-header">
+    <h2>Personal Information</h2>
+    <p>Update your personal information and profile details.</p>
+  </div>
+
+  <div class="form-group">
+    <label for="fullName">Full Name</label>
+    <input id="fullName" type="text" formControlName="fullName" placeholder="Your full name">
+  </div>
+
+  <div class="form-group">
+    <label for="email">Email</label>
+    <input id="email" type="email" formControlName="email">
+    <small>This is the email address used for account notifications.</small>
+  </div>
+
+  <div class="form-group">
+    <label for="location">Location</label>
+    <input id="location" type="text" formControlName="location" placeholder="Your city or area">
+    <small>This helps match you with nearby opportunities.</small>
+  </div>
+
+  <div class="form-group">
+    <label for="skills">Skills</label>
+    <input id="skills" type="text" formControlName="skills" placeholder="Separate skills with commas">
+  </div>
+
+  <div class="form-group">
+    <label for="bio">Bio</label>
+    <textarea id="bio" formControlName="bio" rows="4" placeholder="Short biography or profile description"></textarea>
+  </div>
+
+  <button type="submit" class="btn-primary">Save Changes</button>
+</form>
