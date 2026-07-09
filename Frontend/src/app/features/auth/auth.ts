@@ -40,11 +40,22 @@ export class AuthComponent {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe({
         next: (res: any) => {
+          // 1. Save the token
           this.authService.setToken(res.data.accessToken);
-          this.router.navigate(['/dashboard']);
+          
+          // 2. Save the full user object returned by the API
+          if (res.data.user) {
+            this.authService.setUser(res.data.user);
+          }
+
+          // 3. Navigate to the profile page
+          this.router.navigate(['/profile']);
         },
         error: (err) => alert(err.error?.message || 'Login failed')
       });
+    } else {
+      // Show validation errors if form is invalid
+      this.loginForm.markAllAsTouched();
     }
   }
 

@@ -11,10 +11,10 @@
   </div>
 
   <div class="user-block">
-    <div class="avatar">A</div>
+    <div class="avatar">{{ currentUser?.name?.charAt(0) || 'U' }}</div>
     <div class="user-text">
-      <span class="user-name">Admin User</span>
-      <span class="user-role">Admin</span>
+      <span class="user-name">{{ currentUser?.name || 'Guest User' }}</span>
+      <span class="user-role">{{ (currentUser?.role | titlecase) || 'User' }}</span>
     </div>
   </div>
 
@@ -33,7 +33,7 @@
       <li class="active"><a href="#"><span class="material-symbols-outlined">person</span> My Profile</a></li>
       <li><a href="#"><span class="material-symbols-outlined">settings</span> Settings</a></li>
       <li><a href="#"><span class="material-symbols-outlined">help_outline</span> Help & Support</a></li>
-      <li><a href="#"><span class="material-symbols-outlined">admin_panel_settings</span> Admin Panel</a></li>
+      <li *ngIf="currentUser?.role === 'admin'"><a href="#"><span class="material-symbols-outlined">admin_panel_settings</span> Admin Panel</a></li>
     </ul>
   </nav>
 </aside>

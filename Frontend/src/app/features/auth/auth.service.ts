@@ -23,12 +23,29 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 
-  // Utility to store token
+  // --- Token Management ---
   setToken(token: string): void {
     localStorage.setItem('wastezero_token', token);
   }
 
   getToken(): string | null {
     return localStorage.getItem('wastezero_token');
+  }
+
+  // --- User Data Management ---
+  setUser(user: any): void {
+    localStorage.setItem('wastezero_user', JSON.stringify(user));
+  }
+
+  getCurrentUser(): any {
+    const userStr = localStorage.getItem('wastezero_user');
+    if (!userStr) return null;
+    
+    try {
+      return JSON.parse(userStr);
+    } catch (e) {
+      console.error('Error parsing user data from local storage', e);
+      return null;
+    }
   }
 }

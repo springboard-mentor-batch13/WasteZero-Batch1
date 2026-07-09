@@ -40,11 +40,11 @@
         <div class="user-dropdown" (click)="toggleDropdown()">
 
           <div class="avatar-small">
-            A
+            {{ currentUser?.name?.charAt(0) || 'U' }}
           </div>
 
           <span class="user-name">
-            Admin User
+            {{ currentUser?.name || 'Guest User' }}
           </span>
 
           <span class="material-symbols-outlined dropdown-icon" [style.transform]="isDropdownOpen ? 'rotate(180deg)' : 'rotate(0)'" style="transition: transform 0.2s;">

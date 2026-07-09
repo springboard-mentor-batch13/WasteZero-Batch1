@@ -9,9 +9,9 @@ const {
   REFRESH_TOKEN_BYTES
 } = require('../constants/security');
 
-const generateAccessToken = (userId, role) => {
+const generateAccessToken = (userId, role, name) => {
   return jwt.sign(
-    { userId, role },
+    { userId, role, name }, // Added name to the payload
     process.env.JWT_SECRET,
     { expiresIn: `${ACCESS_TOKEN_EXPIRY_MINUTES}m` }
   );

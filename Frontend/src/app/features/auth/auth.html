@@ -36,11 +36,12 @@
             <h3>Login to your account</h3>
             <p class="subtitle">Enter your credentials to access your account</p>
             <form [formGroup]="loginForm" (ngSubmit)="onLogin()">
-              <label>Username</label>
-              <input type="text" formControlName="username" placeholder="Your username"
-                [class.invalid]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
-              <div class="error-text" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
-                Username is required
+              
+              <label>Email</label>
+              <input type="email" formControlName="email" placeholder="Your email"
+                [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+              <div class="error-text" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                A valid email is required
               </div>
 
               <label>Password</label>

@@ -1,14 +1,17 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { Sidebar } from '../../shared/sidebar/sidebar';
 import { PersonalInfoComponent } from './personal-info/personal-info';
 import { PasswordChangeComponent } from './password-change/password-change';
 import { MobileBottomNav } from '../../shared/mobile-bottom-nav/mobile-bottom-nav';
+import { AuthService } from '../auth/auth.service';
 
 @Component({
   selector: 'app-profile',
   standalone: true,
   imports: [
+    CommonModule,
     Sidebar,
     PersonalInfoComponent,
     PasswordChangeComponent,
@@ -17,13 +20,21 @@ import { MobileBottomNav } from '../../shared/mobile-bottom-nav/mobile-bottom-na
   templateUrl: './profile.html',
   styleUrls: ['./profile.scss']
 })
-export class Profile {
+export class Profile implements OnInit {
 
   activeTab: 'profile' | 'password' = 'profile';
   isSidebarOpen = false;
   isDropdownOpen = false;
+  
+  // Variable to hold the user data
+  currentUser: any = null;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    // Fetch the user data when the component loads
+    this.currentUser = this.authService.getCurrentUser();
+  }
 
   setActiveTab(tab: 'profile' | 'password'): void {
     this.activeTab = tab;
@@ -37,13 +48,17 @@ export class Profile {
     this.isSidebarOpen = false;
   }
 
-
   toggleDropdown(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
 
   logout(): void {
     console.log('Logging out...');
+    
+    // Clear all user and auth data from local storage
+    localStorage.removeItem('wastezero_token'); 
+    localStorage.removeItem('wastezero_user'); 
+    
     this.router.navigate(['/auth']);
   }
 
@@ -55,7 +70,6 @@ export class Profile {
     }
   }
 
-
   onInfoHandoff(event: unknown): void {
     console.log('Personal Info Form Submitted:', event);
   }
@@ -63,5 +77,4 @@ export class Profile {
   onPasswordHandoff(event: unknown): void {
     console.log('Password Change Form Submitted:', event);
   }
-
 }
