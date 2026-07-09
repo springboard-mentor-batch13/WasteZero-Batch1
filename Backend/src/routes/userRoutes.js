@@ -1,11 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middlewares/authMiddleware');
-const userController = require('../controllers/userController');
+const { 
+  getProfile, 
+  updateProfile, 
+  deleteAccount, 
+  initiatePasswordChange, 
+  confirmPasswordChange 
+} = require('../controllers/userController');
 
 router.use(authMiddleware);
 
-router.get('/profile', userController.getProfile);
-router.put('/profile', userController.updateProfile);
+router.get('/profile', getProfile);
+router.put('/profile', updateProfile);
+router.delete('/profile', deleteAccount);
+
+router.post('/change-password-init', initiatePasswordChange);
+router.post('/change-password-confirm', confirmPasswordChange);
 
 module.exports = router;

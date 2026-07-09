@@ -1,6 +1,18 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormGroup, FormControl, FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormGroup, FormControl, FormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
+import { AuthService } from '../../auth/auth.service';
+
+// Custom validator to check if newPassword and confirmPassword match perfectly
+export function passwordMatchValidator(control: AbstractControl): ValidationErrors | null {
+  const newPassword = control.get('newPassword')?.value;
+  const confirmPassword = control.get('confirmPassword')?.value;
+  
+  if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+    return { passwordMismatch: true };
+  }
+  return null;
+}
 
 @Component({
   selector: 'app-password-change',
@@ -10,57 +22,75 @@ import { ReactiveFormsModule, FormGroup, FormControl, FormsModule } from '@angul
   styleUrls: ['./password-change.scss']
 })
 export class PasswordChangeComponent {
-  @Output() passwordUpdate = new EventEmitter<any>();
-
-  // Modal State
   showOtpModal: boolean = false;
   otpValue: string = '';
+  
+  isLoading: boolean = false;
+  successMessage: string = '';
+  errorMessage: string = '';
 
   passwordForm = new FormGroup({
-    currentPassword: new FormControl(''),
-    newPassword: new FormControl(''),
-    confirmPassword: new FormControl('')
-  });
+    currentPassword: new FormControl('', Validators.required),
+    newPassword: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    confirmPassword: new FormControl('', Validators.required)
+  }, { validators: passwordMatchValidator }); // Apply the custom validator to the whole form
 
-  /**
-   * Triggered when the user clicks the initial "Change Password" button.
-   * Opens the OTP modal instead of submitting immediately.
-   */
+  constructor(
+    private authService: AuthService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
   onSubmit() {
-    if (this.passwordForm.valid) {
-      this.showOtpModal = true;
-      // Note: Trigger your backend service to send the OTP to the email here
-      console.log('OTP sent to registered email.');
-    }
+    if (this.passwordForm.invalid) return;
+
+    this.isLoading = true;
+    this.successMessage = '';
+    this.errorMessage = '';
+
+    const currentPassword = this.passwordForm.get('currentPassword')?.value;
+
+    this.authService.initiatePasswordChange(currentPassword!).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.showOtpModal = true;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Incorrect current password or server error.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
-  /**
-   * Closes the OTP modal and resets the input.
-   */
   closeOtpModal() {
     this.showOtpModal = false;
     this.otpValue = '';
   }
 
-  /**
-   * Submits the OTP for verification and emits the final payload.
-   */
   submitOtp() {
     if (!this.otpValue) {
-      alert('Please enter the OTP');
+      this.errorMessage = 'Please enter the OTP';
       return;
     }
 
-    console.log('Verifying OTP:', this.otpValue);
-    
-    // Emit the form values along with the entered OTP
-    this.passwordUpdate.emit({
-      ...this.passwordForm.value,
-      otp: this.otpValue
-    });
+    this.isLoading = true;
+    this.errorMessage = '';
+    const newPassword = this.passwordForm.get('newPassword')?.value;
 
-    // Close the modal and optionally reset the form
-    this.closeOtpModal();
-    this.passwordForm.reset();
+    this.authService.confirmPasswordChange(this.otpValue, newPassword!).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.successMessage = 'Password changed successfully!';
+        this.closeOtpModal();
+        this.passwordForm.reset();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.errorMessage = err.error?.message || 'Invalid OTP. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

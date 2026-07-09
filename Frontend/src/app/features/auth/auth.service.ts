@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
+  private userApiUrl = `${environment.apiUrl}/users`; 
 
   constructor(private http: HttpClient) {}
 
@@ -23,7 +24,27 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, credentials);
   }
 
-  // --- Token Management ---
+  // --- Profile Management ---
+  getProfile(): Observable<any> {
+    return this.http.get(`${this.userApiUrl}/profile`);
+  }
+
+  updateProfile(profileData: any): Observable<any> {
+    return this.http.put(`${this.userApiUrl}/profile`, profileData);
+  }
+
+  deleteAccount(): Observable<any> {
+    return this.http.delete(`${this.userApiUrl}/profile`);
+  }
+
+  initiatePasswordChange(currentPassword: string): Observable<any> {
+    return this.http.post(`${this.userApiUrl}/change-password-init`, { currentPassword });
+  }
+
+  confirmPasswordChange(otp: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.userApiUrl}/change-password-confirm`, { otp, newPassword });
+  }
+
   setToken(token: string): void {
     localStorage.setItem('wastezero_token', token);
   }
@@ -32,7 +53,6 @@ export class AuthService {
     return localStorage.getItem('wastezero_token');
   }
 
-  // --- User Data Management ---
   setUser(user: any): void {
     localStorage.setItem('wastezero_user', JSON.stringify(user));
   }

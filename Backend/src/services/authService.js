@@ -56,7 +56,7 @@ const register = async ({ name, email, password, role, skills, location, bio }, 
     emailWarning = true;
   }
 
-  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const accessToken = tokenService.generateAccessToken(user._id, user.role, user.name);
   const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
   const ipAddress = req.ip || req.connection?.remoteAddress || '';
   const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
@@ -173,7 +173,7 @@ const login = async ({ email, password, rememberMe }, req = {}) => {
     };
   }
 
-  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const accessToken = tokenService.generateAccessToken(user._id, user.role, user.name);
   const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
   const ipAddress = req.ip || req.connection?.remoteAddress || '';
   const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
@@ -250,7 +250,7 @@ const verify2fa = async (sessionToken, otp, req = {}) => {
 
   const userAgent = req.headers ? req.headers['user-agent'] || '' : '';
   const ipAddress = req.ip || req.connection?.remoteAddress || '';
-  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const accessToken = tokenService.generateAccessToken(user._id, user.role, user.name);
   const { token: refreshToken, expiresAt } = await tokenService.generateRefreshToken(
     user._id, session.rememberMe, userAgent, ipAddress
   );
@@ -561,7 +561,7 @@ const refreshToken = async (plainRefreshToken) => {
     throw ApiError.forbidden('Email not verified. Please verify your email before refreshing session');
   }
 
-  const accessToken = tokenService.generateAccessToken(user._id, user.role);
+  const accessToken = tokenService.generateAccessToken(user._id, user.role, user.name);
   const { token: newRefreshToken, expiresAt } = await tokenService.rotateRefreshToken(
     plainRefreshToken,
     user._id,
