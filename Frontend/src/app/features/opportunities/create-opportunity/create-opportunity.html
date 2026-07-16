@@ -1,0 +1,185 @@
+<form [formGroup]="opportunityForm" (ngSubmit)="onSubmit()" class="form-layout">
+
+  <div class="section-header">
+    <h2>Create New Opportunity</h2>
+    <p>Create a volunteering opportunity for interested volunteers.</p>
+  </div>
+
+  <!-- Opportunity Title -->
+  <div class="form-group">
+    <label for="title">Opportunity Title</label>
+
+    <input
+      id="title"
+      type="text"
+      formControlName="title"
+      placeholder="Enter opportunity title">
+
+    @if(opportunityForm.get('title')?.invalid &&
+        opportunityForm.get('title')?.touched){
+
+      <small>Opportunity title is required.</small>
+
+    }
+  </div>
+
+  <!-- Description -->
+  <div class="form-group">
+
+    <label for="description">Description</label>
+
+    <textarea
+      id="description"
+      rows="5"
+      formControlName="description"
+      placeholder="Describe the opportunity">
+    </textarea>
+
+    @if(opportunityForm.get('description')?.invalid &&
+        opportunityForm.get('description')?.touched){
+
+      <small>Description is required.</small>
+
+    }
+
+  </div>
+
+  <!-- Date -->
+  <div class="form-group">
+
+    <label for="date">Date</label>
+
+    <input
+      id="date"
+      type="date"
+      formControlName="applicationDeadline">
+
+    @if(opportunityForm.get('applicationDeadline')?.touched){
+
+  @if(opportunityForm.get('applicationDeadline')?.errors?.['required']){
+    <small>Date is required.</small>
+  }
+
+  @if(opportunityForm.get('applicationDeadline')?.errors?.['pastDate']){
+    <small>Please select a future date.</small>
+  }
+
+}
+
+  </div>
+
+  <div class="form-group">
+
+  <label for="durationValue">Duration Value</label>
+
+  <input
+    id="durationValue"
+    type="number"
+    formControlName="durationValue"
+    min="1"
+    placeholder="Enter duration">
+
+  @if(opportunityForm.get('durationValue')?.invalid &&
+      opportunityForm.get('durationValue')?.touched){
+
+    <small>Duration value is required.</small>
+
+  }
+
+</div>
+
+<div class="form-group">
+
+  <label for="durationUnit">Duration Unit</label>
+
+  <select
+    id="durationUnit"
+    formControlName="durationUnit">
+
+    <option value="hours">Hours</option>
+    <option value="days">Days</option>
+    <option value="weeks">Weeks</option>
+    <option value="months">Months</option>
+
+  </select>
+
+</div>
+
+  <div class="form-group">
+
+  <label for="city">City</label>
+
+  <input
+    id="city"
+    type="text"
+    formControlName="city"
+    placeholder="Enter city">
+
+  @if(opportunityForm.get('city')?.invalid &&
+      opportunityForm.get('city')?.touched){
+
+    <small>City is required.</small>
+
+  }
+
+</div>
+
+<div class="form-group">
+
+  <label for="state">State</label>
+
+  <input
+    id="state"
+    type="text"
+    formControlName="state"
+    placeholder="Enter state">
+
+  @if(opportunityForm.get('state')?.invalid &&
+      opportunityForm.get('state')?.touched){
+
+    <small>State is required.</small>
+
+  }
+
+</div>
+
+  <!-- Required Skills -->
+  <div class="form-group">
+
+    <label for="skills">Required Skills</label>
+
+    <input
+      id="skills"
+      type="text"
+      formControlName="requiredSkills"
+      placeholder="Separate skills with commas">
+
+    @if(opportunityForm.get('requiredSkills')?.invalid &&
+        opportunityForm.get('requiredSkills')?.touched){
+
+      <small>Required skills are mandatory.</small>
+
+    }
+
+  </div>
+  
+  <div class="form-group">
+
+  <label for="maxVolunteers">Maximum Volunteers</label>
+
+  <input
+    id="maxVolunteers"
+    type="number"
+    formControlName="maxVolunteers"
+    min="0"
+    placeholder="0 = Unlimited">
+
+</div>
+
+  <button type="submit" class="btn-primary">
+
+    Create Opportunity
+
+  </button>
+
+</form>

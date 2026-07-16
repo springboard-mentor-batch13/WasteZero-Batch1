@@ -1,0 +1,39 @@
+<aside class="sidebar">
+  <button class="close-mobile-btn" (click)="closeSidebar()">
+  <span class="material-symbols-outlined">
+    chevron_left
+  </span>
+</button>
+
+  <div class="logo-container">
+    <span class="material-symbols-outlined logo-icon">recycling</span>
+    <h2>WasteZero</h2>
+  </div>
+
+  <div class="user-block">
+    <div class="avatar">{{ currentUser?.name?.charAt(0) || 'U' }}</div>
+    <div class="user-text">
+      <span class="user-name">{{ currentUser?.name || 'Guest User' }}</span>
+      <span class="user-role">{{ (currentUser?.role | titlecase) || 'User' }}</span>
+    </div>
+  </div>
+
+  <nav class="main-menu">
+    <h3>MAIN MENU</h3>
+    <ul>
+      <li><a href="#"><span class="material-symbols-outlined">grid_view</span> Dashboard</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">calendar_today</span> Schedule Pickup</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">eco</span> Opportunities</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">chat_bubble_outline</span> Messages</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">explore</span> My Impact</a></li>
+    </ul>
+
+    <h3>SETTINGS</h3>
+    <ul>
+      <li class="active"><a href="#"><span class="material-symbols-outlined">person</span> My Profile</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">settings</span> Settings</a></li>
+      <li><a href="#"><span class="material-symbols-outlined">help_outline</span> Help & Support</a></li>
+      <li *ngIf="currentUser?.role === 'admin'"><a href="#"><span class="material-symbols-outlined">admin_panel_settings</span> Admin Panel</a></li>
+    </ul>
+  </nav>
+</aside>
