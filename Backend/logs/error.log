@@ -1,0 +1,2 @@
+2026-07-09 10:36:30 [ERROR] Failed to start server:
+2026-07-10 10:59:28 [ERROR] Email send failed [verifyEmail] to s***@gmail.com: Client network socket disconnected before secure TLS connection was established
