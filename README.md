@@ -206,6 +206,40 @@ See `src/docs/database.md` for full ER diagram and indexes.
 - `npm start` — Start production server
 - `npm run dev` — Start development server (with --watch)
 
+## Project Milestones
+
+### Milestone 1 — User Management ✅
+
+- User registration with role selection (volunteer/ngo/admin)
+- JWT authentication with access + refresh tokens
+- Profile management (get, update, delete)
+- Role-based access control
+- Input validation with Joi
+- Email verification with OTP
+- Password recovery (forgot/reset password)
+- Two-factor authentication (2FA)
+- Session management with token rotation
+- Account lockout on brute force
+
+### Milestone 2 — Opportunity Management ✅
+
+- NGO can create, update, soft-delete opportunities
+- Volunteers can browse and search opportunities
+- Full-text search, filter by status/city/skills
+- Pagination and sorting
+- Ownership middleware (only owner can modify)
+- Status transitions (Open → In Progress → Closed)
+
+### Milestone 3 — Real-Time Communication ✅
+
+- Real-time messaging using Socket.IO
+- Chat history with pagination
+- Conversation list with partner details
+- Typing indicators
+- Online/offline user tracking
+- Notification system (REST + real-time events)
+- 7 Socket.IO events
+
 ## Implemented Modules
 
 - [x] User Management (Milestone 1)
@@ -222,6 +256,12 @@ See `src/docs/database.md` for full ER diagram and indexes.
 - Application APIs (CRUD for applications)
 - Matching algorithm (skills + location)
 - Admin dashboard & analytics
+
+## Backend Statistics
+
+- REST APIs: 32
+- Socket.IO Events: 7
+- Total Backend Endpoints: 39
 
 ## Author
 
