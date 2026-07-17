@@ -1,0 +1,14 @@
+node_modules/
+.opencode/
+postman/
+.env
+logs/
+*.log
+.DS_Store
+
+# Ignore ALL personal/internal .md and .txt files
+# Only README.md is public-facing documentation
+*.md
+*.txt
+*.pdf
+!README.md
