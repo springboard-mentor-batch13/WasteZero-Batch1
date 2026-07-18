@@ -13,3 +13,4 @@ generate-pdf.js
 *.txt
 *.pdf
 !README.md
+_verify_all.js 
