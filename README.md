@@ -70,15 +70,7 @@ npm run dev
 
 Server starts at `http://localhost:3000`. Health check: `GET /health`
 
-## Environment Variables
 
-```
-PORT=3000
-MONGODB_URI=mongodb://localhost:27017/wastezero
-JWT_SECRET=your-secret-key-change-in-production
-JWT_EXPIRES_IN=7d
-NODE_ENV=development
-```
 
 ## Database Schema
 
@@ -230,43 +222,4 @@ See `src/docs/database.md` for full ER diagram and indexes.
 - Ownership middleware (only owner can modify)
 - Status transitions (Open → In Progress → Closed)
 
-### Milestone 3 — Real-Time Communication ✅
 
-- Real-time messaging using Socket.IO
-- Chat history with pagination
-- Conversation list with partner details
-- Typing indicators
-- Online/offline user tracking
-- Notification system (REST + real-time events)
-- 7 Socket.IO events
-
-## Implemented Modules
-
-- [x] User Management (Milestone 1)
-- [x] Opportunity Management (Milestone 2)
-- [x] Application Model & Validator (Backend Foundation)
-- [x] Message Model & Validator (Backend Foundation)
-- [x] AdminLog Model & Validator (Backend Foundation)
-- [x] Advanced Security — A1-A7 (Email Verification, 2FA, Session Management, etc.)
-- [x] Real-time Messaging (Socket.IO)
-- [x] Notifications (REST + Socket)
-
-## Future Enhancements (Not Implemented)
-
-- Application APIs (CRUD for applications)
-- Matching algorithm (skills + location)
-- Admin dashboard & analytics
-
-## Backend Statistics
-
-- REST APIs: 32
-- Socket.IO Events: 7
-- Total Backend Endpoints: 39
-
-## Author
-
-Developed as part of Infosys Springboard 7.0 Virtual Internship.
-
----
-
-**Status:** Backend Verification Complete ✅ — Production Ready.
