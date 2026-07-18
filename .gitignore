@@ -5,6 +5,7 @@ postman/
 logs/
 *.log
 .DS_Store
+generate-pdf.js
 
 # Ignore ALL personal/internal .md and .txt files
 # Only README.md is public-facing documentation

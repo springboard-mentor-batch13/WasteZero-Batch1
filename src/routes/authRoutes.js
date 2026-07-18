@@ -9,7 +9,7 @@ const isDev = process.env.NODE_ENV === 'development';
 
 const resend2faLimiter = rateLimit({
   windowMs: 30 * 1000,
-  max: isDev ? 1000 : 1,
+  max: 1,
   message: {
     success: false,
     message: 'Please wait 30 seconds before requesting a new code.',

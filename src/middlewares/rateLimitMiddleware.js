@@ -5,7 +5,7 @@ const isDev = process.env.NODE_ENV === 'development';
 const createLimiter = (windowMs, max, message) => {
   return rateLimit({
     windowMs,
-    max: isDev ? max * 1000 : max,
+    max: max,
     message: () => ({
       success: false,
       message,
