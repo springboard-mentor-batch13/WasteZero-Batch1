@@ -1,0 +1,43 @@
+2026-08-06 10:57:19 [INFO] MongoDB connected: localhost
+2026-08-06 10:57:19 [INFO] Server running on port 3000
+2026-08-06 10:57:19 [INFO] Socket.IO messaging is live on the same port
+2026-08-06 10:57:47 [INFO] Socket connected: user 6a71bd5668521705c798d054 (uON0jhq59td26zUBAAAB)
+2026-08-06 10:57:47 [INFO] Socket connected: user 6a71bd5668521705c798d054 (1eWOm0z1r5qxp5FJAAAD)
+2026-08-06 10:58:39 [INFO] Socket connected: user 6a71bff368521705c798d05c (b7S2Zt1hEMKjBcK8AAAG)
+2026-08-06 10:58:39 [INFO] Socket connected: user 6a71bff368521705c798d05c (SEDgQU0K54FTgMieAAAH)
+2026-08-06 10:59:09 [INFO] Socket disconnected: user 6a71bff368521705c798d05c (SEDgQU0K54FTgMieAAAH)
+2026-08-06 10:59:09 [INFO] Socket disconnected: user 6a71bff368521705c798d05c (b7S2Zt1hEMKjBcK8AAAG)
+2026-08-06 10:59:11 [INFO] Socket disconnected: user 6a71bd5668521705c798d054 (uON0jhq59td26zUBAAAB)
+2026-08-06 10:59:11 [INFO] Socket disconnected: user 6a71bd5668521705c798d054 (1eWOm0z1r5qxp5FJAAAD)
+2026-08-06 11:13:27 [INFO] MongoDB connected: localhost
+2026-08-06 11:13:27 [INFO] Server running on port 3000
+2026-08-06 11:13:27 [INFO] Socket.IO messaging is live on the same port
+2026-08-06 11:14:14 [INFO] verifyEmail email dispatched successfully to s***@gmail.com
+2026-08-06 11:15:05 [INFO] Socket connected: user 6a741f28bb047f744b7d4ba0 (wT9ZbaAb0vudzRR9AAAB)
+2026-08-06 11:15:56 [INFO] verifyEmail email dispatched successfully to s***@gmail.com
+2026-08-06 11:17:43 [INFO] verifyEmail email dispatched successfully to r***@gmail.com
+2026-08-06 11:18:50 [INFO] verifyEmail email dispatched successfully to w***@gmail.com
+2026-08-06 11:19:54 [INFO] Socket connected: user 6a74203dbb047f744b7d4ba9 (SjBsq3xA-4lf_dNyAAAD)
+2026-08-06 11:22:43 [INFO] MongoDB connected: localhost
+2026-08-06 11:22:43 [INFO] Server running on port 3000
+2026-08-06 11:22:43 [INFO] Socket.IO messaging is live on the same port
+2026-08-06 11:22:44 [INFO] Socket connected: user 6a74203dbb047f744b7d4ba9 (exf7N_JXvG2u0ASqAAAB)
+2026-08-06 11:22:44 [INFO] Socket connected: user 6a741f28bb047f744b7d4ba0 (sr1Oidx-ZqwzuUbcAAAD)
+2026-08-06 11:22:54 [INFO] Socket disconnected: user 6a741f28bb047f744b7d4ba0 (sr1Oidx-ZqwzuUbcAAAD)
+2026-08-06 11:22:54 [INFO] Socket disconnected: user 6a74203dbb047f744b7d4ba9 (exf7N_JXvG2u0ASqAAAB)
+2026-08-06 11:22:54 [INFO] Socket connected: user 6a741f28bb047f744b7d4ba0 (Py-ISqSaxkdflvx_AAAF)
+2026-08-06 11:23:13 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (o9P8MJy9ZBnFq1vvAAAH)
+2026-08-06 11:23:22 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (xol-LSriUlmxrNF2AAAJ)
+2026-08-06 11:23:35 [INFO] Socket connected: user 6a741f28bb047f744b7d4ba0 (aAEdMx8jGWTY0ZJyAAAL)
+2026-08-06 11:23:48 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (o9P8MJy9ZBnFq1vvAAAH)
+2026-08-06 11:23:48 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (xol-LSriUlmxrNF2AAAJ)
+2026-08-06 11:24:11 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (9vmZ_eOUk120FIXhAAAO)
+2026-08-06 11:24:11 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (wTXde0cimMSfc03IAAAP)
+2026-08-06 11:25:05 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (wTXde0cimMSfc03IAAAP)
+2026-08-06 11:25:05 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (9vmZ_eOUk120FIXhAAAO)
+2026-08-06 11:25:05 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (POmEjESEq3xEObveAAAR)
+2026-08-06 11:25:14 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (POmEjESEq3xEObveAAAR)
+2026-08-06 11:25:14 [INFO] Socket connected: user 6a741ffbbb047f744b7d4ba6 (2-PBzmnWXjB5tHEGAAAT)
+2026-08-06 12:33:08 [INFO] Socket disconnected: user 6a741ffbbb047f744b7d4ba6 (2-PBzmnWXjB5tHEGAAAT)
+2026-08-06 12:33:13 [INFO] Socket disconnected: user 6a741f28bb047f744b7d4ba0 (aAEdMx8jGWTY0ZJyAAAL)
+2026-08-06 12:33:13 [INFO] Socket disconnected: user 6a741f28bb047f744b7d4ba0 (Py-ISqSaxkdflvx_AAAF)
