@@ -87,14 +87,17 @@ CLOUDINARY_API_SECRET=your-api-secret
 
 ## Database Schema
 
-5 Collections with full relationships:
+8 Collections with full relationships:
 
 | Collection | Key Fields | Relationships |
 |------------|-----------|---------------|
 | **Users** | name, email, password, role, skills | — |
 | **Opportunities** | title, description, status, location, duration | → User (ngo) |
 | **Applications** | status (pending/accepted/rejected/withdrawn) | → User, → Opportunity |
+| **Pickups** | address, city, pickupDate, timeSlot, wasteTypes, status | → User (volunteer), → User (ngo) |
 | **Messages** | content, isRead, messageType | → User (sender/receiver), → Application |
+| **RefreshTokens** | tokenHash, expiresAt, isRevoked, device | → User |
+| **Notifications** | type, title, message, isRead | → User (receiver), → User (sender) |
 | **AdminLogs** | action, targetType, targetId, details | → User (admin) |
 
 See `src/docs/database.md` for full ER diagram and indexes.
@@ -151,6 +154,48 @@ See `src/docs/database.md` for full ER diagram and indexes.
 | PATCH | /:id/status | JWT | ngo (owner), admin | Change status |
 | DELETE | /:id | JWT | ngo (owner) | Soft delete |
 
+### Applications (`/api/v1/applications`)
+
+| Method | Route | Auth | Role | Description |
+|--------|-------|------|------|-------------|
+| POST | / | JWT | volunteer | Apply to an opportunity |
+| GET | /mine | JWT | volunteer | My applications |
+| GET | /opportunity/:opportunityId | JWT | ngo, admin | Applicants for an opportunity |
+| PATCH | /:id/status | JWT | ngo (owner), admin | Accept/reject application |
+| DELETE | /opportunity/:opportunityId | JWT | volunteer | Withdraw application |
+
+### Pickups (`/api/v1/pickups`)
+
+| Method | Route | Auth | Role | Description |
+|--------|-------|------|------|-------------|
+| POST | / | JWT | volunteer | Request a pickup |
+| GET | /mine | JWT | volunteer | My pickup requests |
+| GET | /available | JWT | ngo | Pickups awaiting NGO |
+| GET | /accepted | JWT | ngo | Pickups accepted by NGO |
+| GET | /:id | JWT | Any | Get by ID |
+| PATCH | /:id/accept | JWT | ngo | Accept a pickup |
+| PATCH | /:id/decline | JWT | ngo | Decline a pickup |
+| PATCH | /:id/complete | JWT | ngo | Complete a pickup |
+| PATCH | /:id/cancel | JWT | volunteer, admin | Cancel a pickup |
+
+### Messages (`/api/v1/messages`)
+
+| Method | Route | Auth | Role | Description |
+|--------|-------|------|------|-------------|
+| GET | /conversations | JWT | Any | List conversations (one row per other user) |
+| GET | /:userId | JWT | Any | Full chat history with a user |
+| PATCH | /:userId/read | JWT | Any | Mark messages from a user as read |
+| POST | / | JWT | Any | Send a message (REST fallback; primary path is socket `message:send`) |
+
+### Notifications (`/api/v1/notifications`)
+
+| Method | Route | Auth | Role | Description |
+|--------|-------|------|------|-------------|
+| GET | / | JWT | Any | My notifications |
+| GET | /unread-count | JWT | Any | Unread count |
+| PATCH | /:id/read | JWT | Any | Mark one as read |
+| PATCH | /read-all | JWT | Any | Mark all as read |
+
 ### Reports (`/api/v1/reports`)
 
 | Method | Route | Auth | Role | Description |
@@ -161,6 +206,21 @@ See `src/docs/database.md` for full ER diagram and indexes.
 | GET | /activity | JWT | admin | Full activity report (merged users + opportunities + applications feed) |
 
 Reports support optional `from`/`to` ISO date filters (UTC; date-only `to` = end-of-day) and an optional `format` param (`json` default | `csv` downloadable file). CSV output is RFC 4180 + UTF-8 BOM with attachment headers; arrays are pipe-joined, `null` → empty; CSV columns match the JSON rows exactly (same privacy whitelist). `page`/`limit` only apply to opportunities/activity in JSON mode; CSV mode rejects them (full export only, 400).
+
+## Milestone 4 — Report Generation Engine ✅ (Complete)
+
+**Requirement:** Develop the backend logic and database queries to generate analytical reports detailing active users, posted opportunities, and volunteer responses. Structure the backend output to support the specific downloadable files required: Users Report, Pickups Report, Opportunities Report, and Full Activity Report.
+
+**Delivered — 4 admin-only downloadable reports:**
+
+| Report | Endpoint | What it contains |
+|--------|----------|------------------|
+| Users Report | `GET /api/v1/reports/users` | Active users, user details & statistics (by role, new this month, monthly registrations) |
+| Pickups Report | `GET /api/v1/reports/pickups` | Pickup/activity data (by status, city, waste type, time slot, monthly) |
+| Opportunities Report | `GET /api/v1/reports/opportunities` | NGOs' posted opportunities, details & status |
+| Full Activity Report | `GET /api/v1/reports/activity` | Combined users + opportunities + volunteer applications/responses feed |
+
+**Download format:** `?format=csv` → downloadable file (`wastezero-<report>-report-<YYYY-MM-DD>.csv`, RFC 4180 + UTF-8 BOM). `?format=json` (default) → structured data. All reports support optional `from`/`to` UTC date filters. Admin-only access.
 
 ## Security Features
 
@@ -187,11 +247,10 @@ Reports support optional `from`/`to` ISO date filters (UTC; date-only `to` = end
 
 ## Future Modules (Not Implemented)
 
-- Application APIs (CRUD for applications)
 - Matching algorithm (skills + location)
 - Admin dashboard & analytics
 
-> Messaging (REST + Socket.IO), Notification APIs, and the Report Generation Engine are **implemented** — see `src/docs/api.md` for the full endpoint reference.
+> Messaging (REST + Socket.IO), Notification APIs, Application APIs, Pickup APIs, and the Report Generation Engine are **implemented** — see `src/docs/api.md` for the full endpoint reference.
 
 ## Author
 

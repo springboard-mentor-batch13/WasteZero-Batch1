@@ -13,4 +13,9 @@ generate-pdf.js
 *.txt
 *.pdf
 !README.md
-_verify_all.js 
+
+# Temp verification / PDF generation helper scripts (personal, never commit)
+_*.js
+_*.png
+_*.txt
+_*.json
