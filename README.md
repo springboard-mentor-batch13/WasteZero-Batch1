@@ -78,6 +78,11 @@ MONGODB_URI=mongodb://localhost:27017/wastezero
 JWT_SECRET=your-secret-key-change-in-production
 JWT_EXPIRES_IN=7d
 NODE_ENV=development
+
+# Cloudinary (opportunity image uploads) - get these from https://console.cloudinary.com/
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
 ```
 
 ## Database Schema
@@ -134,9 +139,6 @@ See `src/docs/database.md` for full ER diagram and indexes.
 |--------|-------|------|------|-------------|
 | GET | /profile | JWT | Any | Get own profile |
 | PUT | /profile | JWT | Any | Update own profile |
-| DELETE | /profile | JWT | Any | Delete own account |
-| POST | /change-password-init | JWT | Any | Initiate password change (sends OTP) |
-| POST | /change-password-confirm | JWT | Any | Confirm password change with OTP |
 
 ### Opportunities (`/api/v1/opportunities`)
 
@@ -149,39 +151,16 @@ See `src/docs/database.md` for full ER diagram and indexes.
 | PATCH | /:id/status | JWT | ngo (owner), admin | Change status |
 | DELETE | /:id | JWT | ngo (owner) | Soft delete |
 
-### Messages (`/api/v1/messages`)
+### Reports (`/api/v1/reports`)
 
 | Method | Route | Auth | Role | Description |
 |--------|-------|------|------|-------------|
-| GET | /:userId | JWT | Any | Get chat history with a user (paginated) |
+| GET | /users | JWT | admin | Users report (summary + user list) |
+| GET | /pickups | JWT | admin | Pickups report (summary + pickup list) |
+| GET | /opportunities | JWT | admin | Opportunities report (summary + opportunity list) |
+| GET | /activity | JWT | admin | Full activity report (merged users + opportunities + applications feed) |
 
-### Conversations (`/api/v1/conversations`)
-
-| Method | Route | Auth | Role | Description |
-|--------|-------|------|------|-------------|
-| GET | / | JWT | Any | List all conversations (paginated, with partner details) |
-
-### Notifications (`/api/v1/notifications`)
-
-| Method | Route | Auth | Role | Description |
-|--------|-------|------|------|-------------|
-| GET | / | JWT | Any | Get all notifications (paginated) |
-| GET | /unread-count | JWT | Any | Get unread notification count |
-| PATCH | /:id/read | JWT | Any | Mark single notification as read |
-| PATCH | /read-all | JWT | Any | Mark all notifications as read |
-| DELETE | /:id | JWT | Any | Delete a notification |
-
-## Socket.IO Events
-
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| sendMessage | Client → Server | Send a message (receiver, content) |
-| receiveMessage | Server → Client | Receive a message |
-| typing | Client → Server | User is typing |
-| stopTyping | Client → Server | User stopped typing |
-| userOnline | Server → Client | User came online |
-| userOffline | Server → Client | User went offline |
-| notification | Server → Client | Real-time notification |
+Reports support optional `from`/`to` ISO date filters (UTC; date-only `to` = end-of-day) and an optional `format` param (`json` default | `csv` downloadable file). CSV output is RFC 4180 + UTF-8 BOM with attachment headers; arrays are pipe-joined, `null` → empty; CSV columns match the JSON rows exactly (same privacy whitelist). `page`/`limit` only apply to opportunities/activity in JSON mode; CSV mode rejects them (full export only, 400).
 
 ## Security Features
 
@@ -206,62 +185,13 @@ See `src/docs/database.md` for full ER diagram and indexes.
 - `npm start` — Start production server
 - `npm run dev` — Start development server (with --watch)
 
-## Project Milestones
-
-### Milestone 1 — User Management ✅
-
-- User registration with role selection (volunteer/ngo/admin)
-- JWT authentication with access + refresh tokens
-- Profile management (get, update, delete)
-- Role-based access control
-- Input validation with Joi
-- Email verification with OTP
-- Password recovery (forgot/reset password)
-- Two-factor authentication (2FA)
-- Session management with token rotation
-- Account lockout on brute force
-
-### Milestone 2 — Opportunity Management ✅
-
-- NGO can create, update, soft-delete opportunities
-- Volunteers can browse and search opportunities
-- Full-text search, filter by status/city/skills
-- Pagination and sorting
-- Ownership middleware (only owner can modify)
-- Status transitions (Open → In Progress → Closed)
-
-### Milestone 3 — Real-Time Communication ✅
-
-- Real-time messaging using Socket.IO
-- Chat history with pagination
-- Conversation list with partner details
-- Typing indicators
-- Online/offline user tracking
-- Notification system (REST + real-time events)
-- 7 Socket.IO events
-
-## Implemented Modules
-
-- [x] User Management (Milestone 1)
-- [x] Opportunity Management (Milestone 2)
-- [x] Application Model & Validator (Backend Foundation)
-- [x] Message Model & Validator (Backend Foundation)
-- [x] AdminLog Model & Validator (Backend Foundation)
-- [x] Advanced Security — A1-A7 (Email Verification, 2FA, Session Management, etc.)
-- [x] Real-time Messaging (Socket.IO)
-- [x] Notifications (REST + Socket)
-
-## Future Enhancements (Not Implemented)
+## Future Modules (Not Implemented)
 
 - Application APIs (CRUD for applications)
 - Matching algorithm (skills + location)
 - Admin dashboard & analytics
 
-## Backend Statistics
-
-- REST APIs: 32
-- Socket.IO Events: 7
-- Total Backend Endpoints: 39
+> Messaging (REST + Socket.IO), Notification APIs, and the Report Generation Engine are **implemented** — see `src/docs/api.md` for the full endpoint reference.
 
 ## Author
 
@@ -269,4 +199,4 @@ Developed as part of Infosys Springboard 7.0 Virtual Internship.
 
 ---
 
-**Status:** Backend Verification Complete ✅ — Production Ready.
+**Status:** Milestone 4 — Part 5 (Downloadable CSV Reports) ✅ Complete & Frozen. Full endpoint reference in `src/docs/api.md`.
