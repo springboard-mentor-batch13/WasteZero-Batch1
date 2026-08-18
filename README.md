@@ -5,6 +5,7 @@ A full-stack platform connecting NGOs with volunteers for waste cleanup, recycli
 Built as part of the Infosys Springboard 7.0 Virtual Internship.
 
 Live: wastezero-batch1.vercel.app
+
 Alternate: waste-zero-two.vercel.app
 
 ## Tech Stack
